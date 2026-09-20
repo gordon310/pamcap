@@ -45,15 +45,17 @@ npm run build    # 生产构建
 
 识别结果均进入“核对抽屉”，逐字段显示来源与置信度，专家勾选后才写入表单。
 
-### 配置高德 Key
+### 配置高德 Key 与安全密钥
 
-1. 在高德开放平台创建 **Web端(JS API)** Key。
+> 2021-12-02 之后申请的 Key 必须同时提供**安全密钥 securityJsCode**，否则 POI 搜索会失败。
+
+1. 在高德开放平台创建 **Web端(JS API)** Key，并生成**安全密钥**。
 2. 在控制台为该 Key 绑定域名：`gordon310.github.io`（本地开发再加 `localhost`）。
 3. 任选一种方式注入：
-   - GitHub 仓库 **Settings → Secrets and variables → Actions → Variables** 新建变量 `AMAP_KEY`（值即 Key），重新运行部署工作流；或
+   - GitHub 仓库 **Settings → Secrets and variables → Actions → Variables** 新建变量 `AMAP_KEY` 与 `AMAP_SECURITY_CODE`，重新运行部署工作流；或
    - 在应用“智能填充 → 设置 Key”中填写（存于浏览器 localStorage）。
 
-> 前端 Key 属公开信息，务必通过高德控制台的域名白名单限制使用范围。
+> 前端 Key 与安全密钥属公开信息，务必通过高德控制台的域名白名单限制使用范围。
 
 ## 功能
 

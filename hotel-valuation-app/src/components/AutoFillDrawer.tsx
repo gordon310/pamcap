@@ -16,7 +16,7 @@ import {
 } from 'antd';
 import { SearchOutlined, SettingOutlined } from '@ant-design/icons';
 import type { AmapPoi, AutoFillField } from '../services/autofill/types';
-import { searchHotels, getAmapKey, saveAmapKey } from '../services/autofill/amap';
+import { searchHotels, getAmapKey, getAmapSecurityCode, saveAmapCredentials } from '../services/autofill/amap';
 import { classify } from '../services/autofill/classify';
 import { parseHotelText } from '../services/autofill/pasteParser';
 
@@ -52,6 +52,7 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const [amapKey, setAmapKey] = useState(getAmapKey());
+  const [amapSecurityCode, setAmapSecurityCode] = useState(getAmapSecurityCode());
   const [keyEditing, setKeyEditing] = useState(false);
 
   const [keyword, setKeyword] = useState(defaultKeyword);
@@ -81,7 +82,7 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
     setSelectedPoiId(null);
     setMapLoading(true);
     try {
-      const results = await searchHotels(keyword, getAmapKey());
+      const results = await searchHotels(keyword, getAmapKey(), getAmapSecurityCode());
       if (results.length === 0) {
         setMapError('未找到匹配的酒店，请尝试输入更完整的名称。');
       }
@@ -188,24 +189,33 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
       {keyEditing && (
         <div style={{ marginBottom: 16, padding: 12, background: '#fafafa', borderRadius: 6 }}>
           <Text type="secondary">高德地图 Web端(JS API) Key：</Text>
-          <Space.Compact style={{ width: '100%', marginTop: 8 }}>
-            <Input.Password
-              value={amapKey}
-              onChange={(e) => setAmapKey(e.target.value)}
-              placeholder="粘贴高德 Key（需绑定当前域名）"
-            />
-            <Button
-              type="primary"
-              onClick={() => {
-                saveAmapKey(amapKey);
-                setKeyEditing(false);
-              }}
-            >
-              保存
-            </Button>
-          </Space.Compact>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            前端 Key 会公开，请在高德控制台绑定域名 gordon310.github.io（本地开发加 localhost）。
+          <Input.Password
+            style={{ marginTop: 8 }}
+            value={amapKey}
+            onChange={(e) => setAmapKey(e.target.value)}
+            placeholder="粘贴高德 Key（需绑定当前域名）"
+          />
+          <Text type="secondary" style={{ display: 'block', marginTop: 12 }}>
+            安全密钥 securityJsCode：
+          </Text>
+          <Input.Password
+            style={{ marginTop: 8 }}
+            value={amapSecurityCode}
+            onChange={(e) => setAmapSecurityCode(e.target.value)}
+            placeholder="粘贴高德安全密钥（2021-12-02 后申请的 Key 必填）"
+          />
+          <Button
+            type="primary"
+            style={{ marginTop: 12 }}
+            onClick={() => {
+              saveAmapCredentials(amapKey, amapSecurityCode);
+              setKeyEditing(false);
+            }}
+          >
+            保存
+          </Button>
+          <Text type="secondary" style={{ display: 'block', fontSize: 12, marginTop: 8 }}>
+            前端 Key 与安全密钥会公开，请在高德控制台绑定域名 gordon310.github.io（本地开发加 localhost）。
           </Text>
         </div>
       )}

@@ -3,37 +3,60 @@ import type { AmapPoi } from './types';
 declare global {
   interface Window {
     AMap?: any;
+    _AMapSecurityConfig?: { securityJsCode?: string; serviceHost?: string };
   }
 }
 
 let loadPromise: Promise<void> | null = null;
+let loadedCredential = '';
 
 const SCRIPT_ID = 'amap-js-api';
+const KEY_STORE = 'pamcap.amapKey';
+const SECURITY_STORE = 'pamcap.amapSecurityCode';
+
+function readStored(name: string): string {
+  return typeof localStorage !== 'undefined' ? localStorage.getItem(name) || '' : '';
+}
 
 export function getAmapKey(): string {
-  const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('pamcap.amapKey') : null;
+  const stored = readStored(KEY_STORE);
   const envKey = (import.meta.env.VITE_AMAP_KEY as string | undefined) || '';
   return (stored && stored.trim()) || envKey;
 }
 
-export function saveAmapKey(key: string): void {
-  if (typeof localStorage === 'undefined') return;
-  if (key && key.trim()) {
-    localStorage.setItem('pamcap.amapKey', key.trim());
-    loadPromise = null;
-  } else {
-    localStorage.removeItem('pamcap.amapKey');
-  }
+export function getAmapSecurityCode(): string {
+  const stored = readStored(SECURITY_STORE);
+  const envCode = (import.meta.env.VITE_AMAP_SECURITY_CODE as string | undefined) || '';
+  return (stored && stored.trim()) || envCode;
 }
 
-export function loadAmap(key: string): Promise<void> {
+export function saveAmapCredentials(key: string, securityCode: string): void {
+  if (typeof localStorage === 'undefined') return;
+  const k = (key || '').trim();
+  const s = (securityCode || '').trim();
+  if (k) localStorage.setItem(KEY_STORE, k);
+  else localStorage.removeItem(KEY_STORE);
+  if (s) localStorage.setItem(SECURITY_STORE, s);
+  else localStorage.removeItem(SECURITY_STORE);
+  loadPromise = null;
+  loadedCredential = '';
+}
+
+export function loadAmap(key: string, securityCode = ''): Promise<void> {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
     return Promise.reject(new Error('当前环境不支持加载高德地图。'));
   }
   if (window.AMap) return Promise.resolve();
-  if (loadPromise) return loadPromise;
+  if (loadPromise && loadedCredential === key) return loadPromise;
+
+  loadedCredential = key;
 
   loadPromise = new Promise<void>((resolve, reject) => {
+    // 安全密钥必须在加载地图脚本之前设置
+    if (securityCode) {
+      window._AMapSecurityConfig = { securityJsCode: securityCode };
+    }
+
     const existing = document.getElementById(SCRIPT_ID) as HTMLScriptElement | null;
     if (existing) {
       existing.addEventListener('load', () => resolve());
@@ -55,11 +78,16 @@ export function loadAmap(key: string): Promise<void> {
   return loadPromise;
 }
 
-export async function searchHotels(keyword: string, key: string, city?: string): Promise<AmapPoi[]> {
+export async function searchHotels(
+  keyword: string,
+  key: string,
+  securityCode = '',
+  city?: string,
+): Promise<AmapPoi[]> {
   if (!keyword.trim()) throw new Error('请输入酒店名称。');
   if (!key.trim()) throw new Error('未配置高德 Key，请在“设置”中填写。');
 
-  await loadAmap(key);
+  await loadAmap(key, securityCode);
 
   return new Promise<AmapPoi[]>((resolve, reject) => {
     try {
@@ -75,6 +103,8 @@ export async function searchHotels(keyword: string, key: string, city?: string):
           resolve(result.poiList.pois as AmapPoi[]);
         } else if (status === 'no_data') {
           resolve([]);
+        } else if (/USER_SCODE|SECURITY|SCODE/i.test(String(result?.info || status))) {
+          reject(new Error('高德安全密钥未配置或不正确，请在“设置”中填写安全密钥。'));
         } else {
           reject(new Error(`高德搜索失败（${status}），请稍后重试或改用手工录入。`));
         }

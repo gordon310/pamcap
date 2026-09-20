@@ -41,6 +41,7 @@ jobs:
         run: npm run build
         env:
           VITE_AMAP_KEY: ${{ vars.AMAP_KEY }}
+          VITE_AMAP_SECURITY_CODE: ${{ vars.AMAP_SECURITY_CODE }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
