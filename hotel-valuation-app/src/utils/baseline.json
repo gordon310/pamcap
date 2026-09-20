@@ -1,0 +1,36 @@
+{
+  "meta": { "version": "1.0", "updated": "2026-09-20", "source": "平台智库/〔HOST〕/可比交易/GB标准（示例）" },
+  "adr": { "ctrip_discount": 0.7 },
+  "occupancy": { "bias_correction": 0.95 },
+  "revenue": { "days_per_year": 365, "other_income_default": 0.0 },
+  "gop_rate": {
+    "by_segment": { "S1": 0.30, "S2": 0.28, "S3": 0.26, "S4": 0.24, "S5": 0.22, "S6": 0.20 },
+    "by_property_type_adj": { "P1": -0.03, "P2": -0.01, "P3": 0.02, "P4": -0.01, "P5": -0.02, "P6": 0.03, "P7": -0.02 }
+  },
+  "cost_rates": {
+    "management_fee_rate": 0.03,
+    "property_tax_rate": 0.012,
+    "insurance_rate": 0.003,
+    "ffe_rate": 0.04
+  },
+  "owner_expense_coef": { "by_segment": { "S1": 0.03, "S2": 0.03, "S3": 0.02, "S4": 0.02, "S5": 0.015, "S6": 0.015 } },
+  "cap_rate_base": {
+    "by_segment": { "S1": 0.045, "S2": 0.05, "S3": 0.055, "S4": 0.06, "S5": 0.065, "S6": 0.07 }
+  },
+  "ebitda_multiple": {
+    "by_segment": { "S1": [22, 30], "S2": [20, 28], "S3": [18, 25], "S4": [16, 22], "S5": [14, 20], "S6": [12, 18] }
+  },
+  "location_coefficient": {
+    "note": "城市等级 × 区位 → 地段系数（>1 越优）；依据 GB/T 18507-2014、GB/T 18508-2014",
+    "table": {
+      "一线":     { "CBD": 1.15, "次中心": 1.08, "近郊新区": 0.98, "景区度假地": 1.05, "机场高铁": 1.00, "产业园区": 0.95, "其他": 1.00 },
+      "新一线":   { "CBD": 1.12, "次中心": 1.05, "近郊新区": 0.96, "景区度假地": 1.03, "机场高铁": 0.98, "产业园区": 0.93, "其他": 0.98 },
+      "二线":     { "CBD": 1.08, "次中心": 1.02, "近郊新区": 0.94, "景区度假地": 1.01, "机场高铁": 0.96, "产业园区": 0.90, "其他": 0.95 },
+      "三线":     { "CBD": 1.03, "次中心": 0.98, "近郊新区": 0.90, "景区度假地": 0.98, "机场高铁": 0.92, "产业园区": 0.86, "其他": 0.90 },
+      "四线及以下": { "CBD": 0.98, "次中心": 0.93, "近郊新区": 0.85, "景区度假地": 0.95, "机场高铁": 0.88, "产业园区": 0.82, "其他": 0.85 }
+    }
+  },
+  "financing": { "interest_rate": 0.045, "loan_tenor_years": 10, "holding_period_years": 10 },
+  "cost_approach": { "land_benchmark_price_per_sqm": 0.0, "depreciation_rate": 0.0 },
+  "scenario": { "adr_delta": 0.05, "occ_delta": 0.03, "cap_delta_bps": 25, "multiple_delta": 2 }
+}

@@ -1,0 +1,51 @@
+#root {
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.demo-logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+
+.ant-statistic-content {
+  font-size: 1.2em;
+}
+
+.valuation-range-card {
+  text-align: center;
+  padding: 20px;
+}
+
+.valuation-range-card .ant-statistic {
+  margin: 10px;
+}
+
+/* Additional styles for the application */
+.content-padding {
+  padding: 24px;
+}
+
+.result-section {
+  margin-bottom: 24px;
+}
+
+.trace-table {
+  font-size: 12px;
+}
+
+.trace-table td, .trace-table th {
+  padding: 8px;
+}
