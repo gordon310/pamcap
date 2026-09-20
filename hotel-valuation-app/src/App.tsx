@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Layout, theme, Button, Tabs, Grid } from 'antd';
+import { Layout, theme, Button, Tabs, Grid, Space } from 'antd';
 import InputForm from './components/InputForm';
 import ResultsView from './components/ResultsView';
 import CoefficientAdjuster from './components/CoefficientAdjuster';
 import OpinionManager from './components/OpinionManager';
 import VersionHistory from './components/VersionHistory';
+import ExpertGate from './components/ExpertGate';
 import type { ValuationInput } from './types';
 import { useStore } from './stores';
-import { ExportOutlined } from '@ant-design/icons';
+import { hasEvaluation } from './services/profile';
+import { ExportOutlined, UserSwitchOutlined } from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 
@@ -27,6 +29,10 @@ function App() {
     adjustCoefficient,
     createVersion,
     exportSkillPackage,
+    expert,
+    evaluation,
+    registerExpert,
+    logoutExpert,
   } = useStore();
 
   const screens = Grid.useBreakpoint();
@@ -42,6 +48,15 @@ function App() {
   };
 
   const handleExportSkillPackage = () => {
+    if (!result) {
+      alert('请先进行估值计算');
+      return;
+    }
+    if (!hasEvaluation(evaluation)) {
+      alert('请先在“结果”页填写专家评估意见，再导出 Skill 包。');
+      setActiveMainTab('results');
+      return;
+    }
     const skillPackage = exportSkillPackage();
     if (!skillPackage) {
       alert('请先进行估值计算');
@@ -98,16 +113,30 @@ function App() {
             </span>
           </div>
         </div>
-        {result && (
-          <Button
-            type="primary"
-            icon={<ExportOutlined />}
-            onClick={handleExportSkillPackage}
-            size={isMobile ? 'small' : 'middle'}
-          >
-            {isMobile ? '导出' : '导出 Skill 包'}
-          </Button>
-        )}
+        <Space size={4}>
+          {expert && (
+            <Button
+              type="text"
+              size="small"
+              icon={<UserSwitchOutlined />}
+              onClick={logoutExpert}
+              title={`当前专家：${expert.name}（${expert.email}）`}
+            >
+              {isMobile ? '' : expert.name}
+            </Button>
+          )}
+          {result && (
+            <Button
+              type="primary"
+              icon={<ExportOutlined />}
+              onClick={handleExportSkillPackage}
+              disabled={!hasEvaluation(evaluation)}
+              size={isMobile ? 'small' : 'middle'}
+            >
+              {isMobile ? '导出' : '导出 Skill 包'}
+            </Button>
+          )}
+        </Space>
       </Header>
 
       <Content style={{ padding: isMobile ? 8 : 24 }}>
@@ -195,6 +224,8 @@ function App() {
           酒店资产估值验证应用（专家版）©{new Date().getFullYear()} · 仅供内部预估/验证
         </div>
       </Footer>
+
+      <ExpertGate open={!expert} onSubmit={registerExpert} />
     </Layout>
   );
 }

@@ -1,6 +1,8 @@
 import type { FC } from 'react';
 import { Card, Table, Tabs, Statistic, Row, Col, Descriptions, Typography } from 'antd';
 import type { ValuationResult } from '../types';
+import { useStore } from '../stores';
+import EvaluationPanel from './EvaluationPanel';
 
 const { Title, Text } = Typography;
 
@@ -9,6 +11,8 @@ interface ResultsViewProps {
 }
 
 const ResultsView: FC<ResultsViewProps> = ({ result }) => {
+  const { expert, evaluation, setEvaluation } = useStore();
+
   if (!result) {
     return (
       <Card>
@@ -74,7 +78,13 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
   return (
     <div>
       <Title level={3}>估值结果</Title>
-      
+
+      <EvaluationPanel
+        expert={expert}
+        evaluation={evaluation}
+        onChange={setEvaluation}
+      />
+
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col xs={12} md={6}>
           <Statistic 

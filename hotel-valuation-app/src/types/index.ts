@@ -89,6 +89,20 @@ export interface ValuationResult {
   warnings: string[];
 }
 
+// Expert identity (lightweight registration)
+export interface Expert {
+  name: string;
+  email: string;
+}
+
+// Required expert evaluation after a valuation is produced
+export interface Evaluation {
+  content: string;
+  author: string;
+  email: string;
+  at: string;
+}
+
 // Expert Opinion (§11.5)
 export interface Opinion {
   id: string;

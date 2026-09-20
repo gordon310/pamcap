@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import type { ValuationInput, ValuationResult, Opinion, Adjustment, Version } from '../types';
+import type { ValuationInput, ValuationResult, Opinion, Adjustment, Version, Expert, Evaluation } from '../types';
 import { calculateValuation } from '../services/valuation-engine';
+import { loadExpert, saveExpert, clearExpert } from '../services/profile';
 import baselineData from '../utils/baseline.json';
 
 interface AppState {
@@ -12,6 +13,8 @@ interface AppState {
   adjustments: Adjustment[];
   versions: Version[];
   currentVersionId: string | null;
+  expert: Expert | null;
+  evaluation: Evaluation | null;
   calculate: (input: ValuationInput) => void;
   addOpinion: (opinion: Omit<Opinion, 'id' | 'at'>) => void;
   updateOpinion: (id: string, opinion: Opinion) => void;
@@ -19,6 +22,9 @@ interface AppState {
   adjustCoefficient: (keyPath: string, newValue: number, reason: string) => void;
   createVersion: (status?: string) => void;
   setCurrentVersion: (versionId: string) => void;
+  registerExpert: (expert: Expert) => void;
+  logoutExpert: () => void;
+  setEvaluation: (content: string) => void;
   exportSkillPackage: () => any;
 }
 
@@ -31,6 +37,8 @@ export const useStore = create<AppState>((set, get) => ({
   adjustments: [],
   versions: [],
   currentVersionId: null,
+  expert: loadExpert(),
+  evaluation: null,
 
   calculate: (input: ValuationInput) => {
     const { overrides } = get();
@@ -41,6 +49,29 @@ export const useStore = create<AppState>((set, get) => ({
       result,
       opinions: [], // Reset opinions for new calculation
       adjustments: [], // Reset adjustments for new calculation
+      evaluation: null, // 新计算需重新评估
+    });
+  },
+
+  registerExpert: (expert: Expert) => {
+    saveExpert(expert);
+    set({ expert });
+  },
+
+  logoutExpert: () => {
+    clearExpert();
+    set({ expert: null, evaluation: null });
+  },
+
+  setEvaluation: (content: string) => {
+    const { expert } = get();
+    set({
+      evaluation: {
+        content,
+        author: expert?.name || '专家',
+        email: expert?.email || '',
+        at: new Date().toISOString(),
+      },
     });
   },
 
@@ -146,6 +177,8 @@ export const useStore = create<AppState>((set, get) => ({
         description: '酒店资产估值验证技能包',
         createdAt: new Date().toISOString(),
       },
+      expert: state.expert,
+      evaluation: state.evaluation,
       input: state.input,
       result: state.result,
       baseline: { ...state.baseline, ...state.overrides }, // Include overrides in exported baseline
