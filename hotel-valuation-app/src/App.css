@@ -1,51 +1,23 @@
-#root {
-  margin: 0;
-  padding: 0;
-  text-align: left;
-}
-
-.demo-logo {
-  height: 32px;
-  margin: 16px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-}
-
-.site-layout .site-layout-background {
-  background: #fff;
-}
+/* 应用级样式补充 */
 
 .ant-statistic-content {
-  font-size: 1.2em;
+  font-size: 1.1em;
 }
 
-.valuation-range-card {
-  text-align: center;
-  padding: 20px;
+/* 移动端统计卡：避免文字过大溢出 */
+@media (max-width: 767px) {
+  .ant-statistic-title {
+    font-size: 12px;
+  }
+  .ant-statistic-content {
+    font-size: 15px;
+  }
+  .ant-card-head-title {
+    font-size: 15px;
+  }
 }
 
-.valuation-range-card .ant-statistic {
-  margin: 10px;
-}
-
-/* Additional styles for the application */
-.content-padding {
-  padding: 24px;
-}
-
-.result-section {
-  margin-bottom: 24px;
-}
-
-.trace-table {
-  font-size: 12px;
-}
-
-.trace-table td, .trace-table th {
-  padding: 8px;
+/* 让内嵌 Tabs 在窄屏可横向滑动 */
+.ant-tabs-nav {
+  margin-bottom: 12px;
 }

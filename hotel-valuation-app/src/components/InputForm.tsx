@@ -80,7 +80,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
       >
         <Divider titlePlacement="start">通用信息</Divider>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="hotel_name"
               label="酒店名称"
@@ -97,7 +97,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               </Button>
             </Space>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="rooms"
               label="房间数"
@@ -109,7 +109,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         </Row>
         
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="opening_date"
               label="开业时间"
@@ -118,7 +118,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               <DatePicker style={{ width: '100%' }} />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="gfa"
               label="总建筑面积（含地下室）㎡"
@@ -130,7 +130,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         </Row>
         
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="city_tier"
               label="城市等级"
@@ -145,7 +145,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="location"
               label="区位"
@@ -165,7 +165,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         </Row>
         
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="segment"
               label="档次"
@@ -181,7 +181,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="property_type"
               label="业态"
@@ -201,7 +201,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         </Row>
         
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="operation_mode"
               label="经营模式"
@@ -215,7 +215,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="other_income"
               label="其他收入（万元）"
@@ -227,7 +227,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         
         <Divider titlePlacement="start">财务信息</Divider>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="ctrip_adr"
               label="携程均价（元）"
@@ -236,7 +236,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               <InputNumber min={0} style={{ width: '100%' }} placeholder="含税均价" />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="occupancy_input"
               label="全年出租率（业主填报）"
@@ -257,7 +257,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         </Row>
         
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="fb_ratio"
               label="客房餐饮收入比"
@@ -271,7 +271,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="owner_ebitda"
               label="业主利润（EBITDA 口径）万元"
@@ -283,7 +283,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         
         <Divider titlePlacement="start">投资与资本</Divider>
         <Row gutter={16}>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="capex_type"
               label="投资口径"
@@ -296,7 +296,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               </Select>
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} md={12}>
             <Form.Item
               name="equity"
               label="自有资金（万元）"
@@ -314,7 +314,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             if (capexType === 'new') {
               return (
                 <Row gutter={16}>
-                  <Col span={12}>
+                  <Col xs={24} md={12}>
                     <Form.Item
                       name="construction_cost"
                       label="建造成本（不含土地，开业前）万元"
@@ -328,7 +328,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             } else if (capexType === 'acquisition') {
               return (
                 <Row gutter={16}>
-                  <Col span={12}>
+                  <Col xs={24} md={12}>
                     <Form.Item
                       name="acquisition_price"
                       label="存量购买价（万元）"
@@ -342,7 +342,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             } else if (capexType === 'self_renew') {
               return (
                 <Row gutter={16}>
-                  <Col span={12}>
+                  <Col xs={24} md={12}>
                     <Form.Item
                       name="original_cost"
                       label="原建造成本（万元）"
@@ -351,7 +351,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
                       <InputNumber min={0} style={{ width: '100%' }} placeholder="原建造成本" />
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
+                  <Col xs={24} md={12}>
                     <Form.Item
                       name="renovation_cost"
                       label="改造费用（万元）"

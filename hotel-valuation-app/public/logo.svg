@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372 130" role="img" aria-label="PAM PAMSHARE TREE">
+  <g fill="none" stroke="#F0A63A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M53 50 C44 39 38 30 33 21"/>
+    <path d="M67 50 C76 39 82 30 87 21"/>
+    <path d="M30 71 L60 55 L90 71"/>
+    <path d="M26 85 L60 65 L94 85"/>
+    <path d="M32 99 L60 81 L88 99"/>
+    <path d="M20 64 L20 84"/>
+    <path d="M12 72 L12 92"/>
+    <path d="M100 64 L100 84"/>
+    <path d="M108 72 L108 92"/>
+  </g>
+  <g fill="#F0A63A">
+    <circle cx="31" cy="19" r="5"/>
+    <circle cx="89" cy="19" r="5"/>
+    <circle cx="53" cy="48" r="5.5"/>
+    <circle cx="67" cy="48" r="5.5"/>
+  </g>
+  <text x="132" y="64" font-family="'Arial Black', Arial, Helvetica, sans-serif" font-size="56" font-weight="900" letter-spacing="3" fill="#3B5B9B">PAM</text>
+  <text x="135" y="90" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="3.2" fill="#5B7FC0">PAMSHARE TREE</text>
+  <path d="M305 82 H338 V114" fill="none" stroke="#F0A63A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

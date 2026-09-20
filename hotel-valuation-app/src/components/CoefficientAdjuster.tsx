@@ -96,6 +96,7 @@ const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({ baseline, onAdjustm
           rowKey="path"
           pagination={{ pageSize: 10 }}
           size="small"
+          scroll={{ x: 'max-content' }}
         />
       </Card>
 

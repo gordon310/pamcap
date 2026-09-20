@@ -76,7 +76,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
       <Title level={3}>估值结果</Title>
       
       <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
+        <Col xs={12} md={6}>
           <Statistic 
             title="保守估值" 
             value={rangeData.conservative} 
@@ -86,7 +86,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
             suffix="万元"
           />
         </Col>
-        <Col span={6}>
+        <Col xs={12} md={6}>
           <Statistic 
             title="基准估值" 
             value={rangeData.base} 
@@ -96,7 +96,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
             suffix="万元"
           />
         </Col>
-        <Col span={6}>
+        <Col xs={12} md={6}>
           <Statistic 
             title="乐观估值" 
             value={rangeData.optimistic} 
@@ -106,7 +106,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
             suffix="万元"
           />
         </Col>
-        <Col span={6}>
+        <Col xs={12} md={6}>
           <Statistic 
             title="每间房价值" 
             value={result.valuation.per_room} 
@@ -130,6 +130,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
                 dataSource={metricsData}
                 pagination={false}
                 size="small"
+                scroll={{ x: 'max-content' }}
               />
             ),
           },
@@ -142,6 +143,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
                 dataSource={valuationData}
                 pagination={false}
                 size="small"
+                scroll={{ x: 'max-content' }}
               />
             ),
           },
@@ -154,7 +156,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
                 dataSource={result.trace}
                 pagination={{ pageSize: 10 }}
                 size="small"
-                scroll={{ y: 400 }}
+                scroll={{ x: 'max-content', y: 400 }}
               />
             ),
           },

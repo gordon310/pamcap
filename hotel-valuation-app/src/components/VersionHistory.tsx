@@ -103,6 +103,7 @@ const VersionHistory: FC<VersionHistoryProps> = ({
         rowKey="id"
         pagination={{ pageSize: 10 }}
         size="small"
+        scroll={{ x: 'max-content' }}
       />
     </Card>
   );

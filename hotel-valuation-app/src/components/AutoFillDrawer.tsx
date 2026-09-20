@@ -12,6 +12,7 @@ import {
   Space,
   Divider,
   Typography,
+  Grid,
 } from 'antd';
 import { SearchOutlined, SettingOutlined } from '@ant-design/icons';
 import type { AmapPoi, AutoFillField } from '../services/autofill/types';
@@ -46,6 +47,8 @@ function toEditable(fields: AutoFillField[]): EditableField[] {
 }
 
 const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initialTab = 'map', onClose, onApply }) => {
+  const screens = Grid.useBreakpoint();
+  const isMobile = !screens.md;
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const [amapKey, setAmapKey] = useState(getAmapKey());
@@ -170,7 +173,7 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
   return (
     <Drawer
       title="智能填充"
-      width={720}
+      width={isMobile ? '100%' : 720}
       open={open}
       onClose={onClose}
       extra={
@@ -239,6 +242,7 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
                       dataSource={pois}
                       size="small"
                       pagination={false}
+                      scroll={{ x: 'max-content' }}
                       style={{ marginTop: 8 }}
                       rowSelection={{
                         type: 'radio',
@@ -262,6 +266,7 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
                       dataSource={mapFields}
                       size="small"
                       pagination={false}
+                      scroll={{ x: 'max-content' }}
                     />
                     <Button
                       type="primary"
@@ -310,6 +315,7 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
                       dataSource={pasteFields}
                       size="small"
                       pagination={false}
+                      scroll={{ x: 'max-content' }}
                     />
                     <Button
                       type="primary"
