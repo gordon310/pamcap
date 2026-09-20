@@ -101,7 +101,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             <Form.Item
               name="rooms"
               label="房间数"
-              rules={[{ required: true, message: '请输入房间数' }, { min: 1, message: '房间数必须大于0' }]}
+              rules={[{ required: true, message: '请输入房间数' }, { type: 'number', min: 1, message: '房间数必须大于0' }]}
             >
               <InputNumber min={1} style={{ width: '100%' }} placeholder="请输入房间数" />
             </Form.Item>
@@ -122,7 +122,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             <Form.Item
               name="gfa"
               label="总建筑面积（含地下室）㎡"
-              rules={[{ required: true, message: '请输入总建筑面积' }, { min: 0, message: '面积必须大于等于0' }]}
+              rules={[{ required: true, message: '请输入总建筑面积' }, { type: 'number', min: 0, message: '面积必须大于等于0' }]}
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="平方米" />
             </Form.Item>
@@ -231,7 +231,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             <Form.Item
               name="ctrip_adr"
               label="携程均价（元）"
-              rules={[{ required: true, message: '请输入携程均价' }, { min: 0, message: '均价必须大于等于0' }]}
+              rules={[{ required: true, message: '请输入携程均价' }, { type: 'number', min: 0, message: '均价必须大于等于0' }]}
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="含税均价" />
             </Form.Item>
@@ -242,7 +242,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               label="全年出租率（业主填报）"
               rules={[
                 { required: true, message: '请输入全年出租率' },
-                { min: 0, max: 1, message: '出租率应在0-1之间' }
+                { type: 'number', min: 0, max: 1, message: '出租率应在0-1之间' }
               ]}
             >
               <InputNumber 
@@ -261,7 +261,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             <Form.Item
               name="fb_ratio"
               label="客房餐饮收入比"
-              rules={[{ required: true, message: '请输入客房餐饮收入比' }, { min: 0, message: '比例必须大于等于0' }]}
+              rules={[{ required: true, message: '请输入客房餐饮收入比' }, { type: 'number', min: 0, message: '比例必须大于等于0' }]}
             >
               <InputNumber 
                 min={0} 
@@ -300,7 +300,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             <Form.Item
               name="equity"
               label="自有资金（万元）"
-              rules={[{ required: true, message: '请输入自有资金' }, { min: 0, message: '资金必须大于等于0' }]}
+              rules={[{ required: true, message: '请输入自有资金' }, { type: 'number', min: 0, message: '资金必须大于等于0' }]}
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="IRR 杠杆基数" />
             </Form.Item>
@@ -318,7 +318,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
                     <Form.Item
                       name="construction_cost"
                       label="建造成本（不含土地，开业前）万元"
-                      rules={[{ required: true, message: '请输入建造成本' }, { min: 0, message: '成本必须大于等于0' }]}
+                      rules={[{ required: true, message: '请输入建造成本' }, { type: 'number', min: 0, message: '成本必须大于等于0' }]}
                     >
                       <InputNumber min={0} style={{ width: '100%' }} placeholder="总金额" />
                     </Form.Item>
@@ -332,7 +332,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
                     <Form.Item
                       name="acquisition_price"
                       label="存量购买价（万元）"
-                      rules={[{ required: true, message: '请输入购买价格' }, { min: 0, message: '价格必须大于等于0' }]}
+                      rules={[{ required: true, message: '请输入购买价格' }, { type: 'number', min: 0, message: '价格必须大于等于0' }]}
                     >
                       <InputNumber min={0} style={{ width: '100%' }} placeholder="购买价格" />
                     </Form.Item>
@@ -346,7 +346,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
                     <Form.Item
                       name="original_cost"
                       label="原建造成本（万元）"
-                      rules={[{ required: true, message: '请输入原建造成本' }, { min: 0, message: '成本必须大于等于0' }]}
+                      rules={[{ required: true, message: '请输入原建造成本' }, { type: 'number', min: 0, message: '成本必须大于等于0' }]}
                     >
                       <InputNumber min={0} style={{ width: '100%' }} placeholder="原建造成本" />
                     </Form.Item>
@@ -355,7 +355,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
                     <Form.Item
                       name="renovation_cost"
                       label="改造费用（万元）"
-                      rules={[{ required: true, message: '请输入改造费用' }, { min: 0, message: '费用必须大于等于0' }]}
+                      rules={[{ required: true, message: '请输入改造费用' }, { type: 'number', min: 0, message: '费用必须大于等于0' }]}
                     >
                       <InputNumber min={0} style={{ width: '100%' }} placeholder="改造费用" />
                     </Form.Item>
