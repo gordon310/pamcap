@@ -36,6 +36,25 @@ npm test         # 单元测试（含黄金样例）
 npm run build    # 生产构建
 ```
 
+## 智能填充（新增）
+
+输入页“酒店名称”旁提供两种辅助录入：
+
+- **联网识别**：调用高德地图 JS API 搜索酒店 POI，自动推导城市等级 / 区位 / 档次 / 业态。需配置高德 Key。
+- **粘贴解析**：粘贴携程等页面可见文字，前端抽取房间数 / 开业时间 / 建筑面积 / 携程均价。
+
+识别结果均进入“核对抽屉”，逐字段显示来源与置信度，专家勾选后才写入表单。
+
+### 配置高德 Key
+
+1. 在高德开放平台创建 **Web端(JS API)** Key。
+2. 在控制台为该 Key 绑定域名：`gordon310.github.io`（本地开发再加 `localhost`）。
+3. 任选一种方式注入：
+   - GitHub 仓库 **Settings → Secrets and variables → Actions → Variables** 新建变量 `AMAP_KEY`（值即 Key），重新运行部署工作流；或
+   - 在应用“智能填充 → 设置 Key”中填写（存于浏览器 localStorage）。
+
+> 前端 Key 属公开信息，务必通过高德控制台的域名白名单限制使用范围。
+
 ## 功能
 
 - 输入酒店信息 → 自动生成 RevPAR / GOP / NOI / EBITDA / Cap Rate / IRR / 估值区间

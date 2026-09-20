@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import type { FC } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider } from 'antd';
+import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space } from 'antd';
+import { SearchOutlined, SnippetsOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs';
 import type { ValuationInput } from '../types';
+import type { AutoFillField } from '../services/autofill/types';
+import AutoFillDrawer from './AutoFillDrawer';
 
 const { Option } = Select;
 
@@ -8,8 +13,35 @@ interface InputFormProps {
   onSubmit: (values: ValuationInput) => void;
 }
 
+const NUMERIC_KEYS = ['rooms', 'gfa', 'ctrip_adr', 'owner_ebitda', 'other_income', 'equity', 'construction_cost', 'acquisition_price', 'original_cost', 'renovation_cost'];
+
 const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
   const [form] = Form.useForm();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerTab, setDrawerTab] = useState<'map' | 'paste'>('map');
+  const [drawerKeyword, setDrawerKeyword] = useState('');
+
+  const openDrawer = (tab: 'map' | 'paste') => {
+    setDrawerKeyword(String(form.getFieldValue('hotel_name') || ''));
+    setDrawerTab(tab);
+    setDrawerOpen(true);
+  };
+
+  const handleAutoFillApply = (fields: AutoFillField[]) => {
+    const values: Record<string, unknown> = {};
+    fields.forEach((f) => {
+      if (f.key === 'opening_date') {
+        const parsed = dayjs(String(f.value));
+        if (parsed.isValid()) values[f.key] = parsed;
+      } else if (NUMERIC_KEYS.includes(f.key)) {
+        const n = Number(String(f.value).replace(/,/g, ''));
+        if (!Number.isNaN(n)) values[f.key] = n;
+      } else {
+        values[f.key] = f.value;
+      }
+    });
+    form.setFieldsValue(values);
+  };
 
   const onFinish = (values: any) => {
     // Process the form values to match the ValuationInput interface
@@ -54,8 +86,16 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
               label="酒店名称"
               rules={[{ required: true, message: '请输入酒店名称' }]}
             >
-              <Input placeholder="例如：华东_高端_003" />
+              <Input placeholder="例如：上海外滩茂悦大酒店" />
             </Form.Item>
+            <Space style={{ marginTop: -12, marginBottom: 16 }}>
+              <Button size="small" icon={<SearchOutlined />} onClick={() => openDrawer('map')}>
+                联网识别
+              </Button>
+              <Button size="small" icon={<SnippetsOutlined />} onClick={() => openDrawer('paste')}>
+                粘贴解析
+              </Button>
+            </Space>
           </Col>
           <Col span={12}>
             <Form.Item
@@ -333,6 +373,14 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           </Button>
         </Form.Item>
       </Form>
+
+      <AutoFillDrawer
+        open={drawerOpen}
+        defaultKeyword={drawerKeyword}
+        initialTab={drawerTab}
+        onClose={() => setDrawerOpen(false)}
+        onApply={handleAutoFillApply}
+      />
     </Card>
   );
 };
