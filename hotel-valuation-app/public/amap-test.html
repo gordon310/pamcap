@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>AMap connectivity test</title>
+</head>
+<body>
+  <div id="out">pending</div>
+  <script>
+    window._AMapSecurityConfig = { securityJsCode: '01f39035f449e8ebc68b4f4b955a9a5a' };
+  </script>
+  <script src="https://webapi.amap.com/maps?v=2.0&key=c73196d217e1a620ab51b13d68bae20d&plugin=AMap.PlaceSearch"></script>
+  <script>
+    window.addEventListener('load', function () {
+      setTimeout(function () {
+        var out = document.getElementById('out');
+        if (typeof AMap === 'undefined') { out.textContent = 'RESULT {"err":"NO_AMAP"}'; return; }
+        var ps = new AMap.PlaceSearch({ type: '住宿服务', pageSize: 3 });
+        ps.search('上海外滩茂悦大酒店', function (status, result) {
+          try {
+            out.textContent = 'RESULT ' + JSON.stringify({
+              status: status,
+              info: result && result.info,
+              infocode: result && result.infocode,
+              count: result && result.poiList && result.poiList.pois ? result.poiList.pois.length : null
+            });
+          } catch (e) { out.textContent = 'RESULT {"err":"' + e.message + '"}'; }
+        });
+      }, 800);
+    });
+  </script>
+</body>
+</html>
