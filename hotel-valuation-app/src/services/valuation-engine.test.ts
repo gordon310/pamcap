@@ -102,9 +102,10 @@ describe('Valuation Engine Tests', () => {
     
     // 地段系数应正确取自 baseline 表（CBD > 其他）
     expect(resultCBD.metrics.location_coef).toBeGreaterThan(resultOther.metrics.location_coef);
-    // 两种情形均应产出有效估值
-    expect(resultCBD.valuation.range.base).toBeGreaterThan(0);
-    expect(resultOther.valuation.range.base).toBeGreaterThan(0);
+    // 地段越优 → Cap Rate 越低 → 收益法估值越高
+    expect(resultCBD.metrics.cap).toBeLessThan(resultOther.metrics.cap);
+    expect(resultCBD.valuation.income).toBeGreaterThan(resultOther.valuation.income);
+    expect(resultCBD.valuation.range.base).toBeGreaterThan(resultOther.valuation.range.base);
   });
 
   test('should handle missing optional fields with defaults', () => {

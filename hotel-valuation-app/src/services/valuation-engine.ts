@@ -328,19 +328,19 @@ export const calculateValuation = (
   });
   metrics.location_coef = locCoef;
 
-  // S17: Cap Rate
+  // S17: Cap Rate（地段越优 → loc_coef 越大 → Cap Rate 越低 → 估值越高）
   const capRateBase = currentBaseline.cap_rate_base.by_segment[segment] || 0.055;
-  const cap = capRateBase * locCoef;
+  const cap = capRateBase / locCoef;
   trace.push({
     step: 'S17',
     name: 'Cap Rate',
-    formula: 'cap = cap_rate_base[segment] × loc_coef',
+    formula: 'cap = cap_rate_base[segment] ÷ loc_coef',
     inputs: { segment, cap_rate_base: capRateBase, loc_coef: locCoef },
     result: cap,
     unit: '',
-    source: '基准 × 地段',
+    source: '基准 ÷ 地段',
     adjusted: false,
-    note: ''
+    note: '地段系数>1（越优）→ Cap Rate 降低 → 收益法估值提升'
   });
   metrics.cap = cap;
 
