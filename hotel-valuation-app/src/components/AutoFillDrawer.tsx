@@ -4,6 +4,7 @@ import {
   Drawer,
   Tabs,
   Input,
+  Select,
   Button,
   Table,
   Checkbox,
@@ -19,6 +20,7 @@ import type { AmapPoi, AutoFillField } from '../services/autofill/types';
 import { searchHotels, getAmapKey, getAmapSecurityCode, saveAmapCredentials } from '../services/autofill/amap';
 import { classify } from '../services/autofill/classify';
 import { parseHotelText } from '../services/autofill/pasteParser';
+import { getFieldOptions } from '../constants/valuationOptions';
 
 const { Text } = Typography;
 
@@ -148,13 +150,27 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
     {
       title: '值（可编辑）',
       key: 'value',
-      render: (_: unknown, record: EditableField) => (
-        <Input
-          value={String(record.value)}
-          onChange={(e) => updateFieldValue(setter, record.key, e.target.value)}
-          size="small"
-        />
-      ),
+      render: (_: unknown, record: EditableField) => {
+        const options = getFieldOptions(record.key);
+        if (options) {
+          return (
+            <Select
+              size="small"
+              style={{ width: '100%' }}
+              value={record.value === '' ? undefined : String(record.value)}
+              options={options}
+              onChange={(value) => updateFieldValue(setter, record.key, value)}
+            />
+          );
+        }
+        return (
+          <Input
+            value={String(record.value)}
+            onChange={(e) => updateFieldValue(setter, record.key, e.target.value)}
+            size="small"
+          />
+        );
+      },
     },
     {
       title: '置信度',

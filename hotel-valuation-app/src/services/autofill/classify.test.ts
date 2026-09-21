@@ -52,6 +52,19 @@ describe('classify', () => {
     expect(seg?.confidence).toBe('low');
   });
 
+  test('POI 缺少 cityname 时从名称/地址推断城市等级', () => {
+    const result = classify({
+      name: '杭州龙禧福朋喜来登酒店',
+      address: '东信大道868号',
+      adname: '滨江区',
+      type: '住宿服务;宾馆酒店;四星级宾馆',
+    });
+
+    const cityField = result.fields.find((f) => f.key === 'city_tier');
+    expect(cityField?.value).toBe('新一线');
+    expect(cityField?.confidence).toBe('high');
+  });
+
   test('按人均消费推导档次（中置信）', () => {
     const result = classify({
       name: '某某酒店',

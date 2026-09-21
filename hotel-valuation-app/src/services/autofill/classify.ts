@@ -60,7 +60,17 @@ export function classify(poi: AmapPoi): AutoFillResult {
   const source = '高德地图';
   const text = [poi.name, poi.type, poi.business_area, poi.address].filter(Boolean).join(' ');
 
-  const cityMatch = getCityTier(poi.cityname || '');
+  const cityHints = [poi.cityname, poi.pname, poi.adname].filter(Boolean).join(' ');
+  let cityMatch = getCityTier(cityHints);
+  if (cityMatch.confidence !== 'high') {
+    for (const fallback of [poi.name, [poi.address, poi.business_area].filter(Boolean).join(' ')]) {
+      const candidate = getCityTier(fallback);
+      if (candidate.confidence === 'high') {
+        cityMatch = candidate;
+        break;
+      }
+    }
+  }
   fields.push({
     key: 'city_tier',
     label: '城市等级',
@@ -68,8 +78,8 @@ export function classify(poi: AmapPoi): AutoFillResult {
     confidence: cityMatch.confidence,
     source,
   });
-  if (cityMatch.confidence === 'low' && poi.cityname) {
-    warnings.push(`城市「${poi.cityname}」未在分级表中，城市等级需人工确认。`);
+  if (cityMatch.confidence === 'low' && cityHints) {
+    warnings.push(`城市「${cityHints}」未在分级表中，城市等级需人工确认。`);
   }
 
   const segByKeyword = matchRule(text, SEGMENT_RULES);
