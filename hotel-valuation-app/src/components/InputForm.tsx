@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FC } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space } from 'antd';
+import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space, App as AntApp } from 'antd';
+import type { FormProps } from 'antd';
 import { SearchOutlined, SnippetsOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { ValuationInput } from '../types';
@@ -18,6 +19,7 @@ const NUMERIC_KEYS = ['rooms', 'gfa', 'ctrip_adr', 'owner_ebitda', 'other_income
 
 const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
   const [form] = Form.useForm();
+  const { message } = AntApp.useApp();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState<'map' | 'paste'>('map');
   const [drawerKeyword, setDrawerKeyword] = useState('');
@@ -72,12 +74,21 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
     onSubmit(processedValues);
   };
 
+  const onFinishFailed: FormProps['onFinishFailed'] = (errorInfo) => {
+    const first = errorInfo.errorFields[0];
+    if (first) {
+      message.warning(`请完善表单：${first.errors[0]}`);
+    }
+  };
+
   return (
     <Card title="酒店资产估值输入表单" style={{ width: '100%' }}>
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
+        onFinishFailed={onFinishFailed}
+        scrollToFirstError={{ behavior: 'smooth', block: 'center', focus: true }}
       >
         <Divider titlePlacement="start">通用信息</Divider>
         <Row gutter={16}>
