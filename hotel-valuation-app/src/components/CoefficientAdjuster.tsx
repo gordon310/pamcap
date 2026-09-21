@@ -1,14 +1,25 @@
 import { useState } from 'react';
 import type { FC } from 'react';
-import { Card, Table, InputNumber, Button, Space, Modal, Input } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
+import { Card, Table, InputNumber, Button, Space, Modal, Input, Badge } from 'antd';
+import { EditOutlined, CalculatorOutlined, DownloadOutlined } from '@ant-design/icons';
 
 interface CoefficientAdjusterProps {
   baseline: Record<string, any>;
+  canRevalue: boolean;
+  adjustmentCount: number;
   onAdjustment: (keyPath: string, newValue: number, reason: string) => void;
+  onRevalue: () => void;
+  onExportAdjustments: () => void;
 }
 
-const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({ baseline, onAdjustment }) => {
+const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({
+  baseline,
+  canRevalue,
+  adjustmentCount,
+  onAdjustment,
+  onRevalue,
+  onExportAdjustments,
+}) => {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [newValue, setNewValue] = useState<number>(0);
   const [reason, setReason] = useState<string>('');
@@ -89,7 +100,30 @@ const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({ baseline, onAdjustm
 
   return (
     <div>
-      <Card title="基准系数管理">
+      <Card
+        title="基准系数管理"
+        extra={
+          <Space wrap>
+            <Badge count={adjustmentCount} size="small" offset={[-2, 2]}>
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={onExportAdjustments}
+                disabled={adjustmentCount === 0}
+              >
+                导出系数调整汇总
+              </Button>
+            </Badge>
+            <Button
+              type="primary"
+              icon={<CalculatorOutlined />}
+              onClick={onRevalue}
+              disabled={!canRevalue}
+            >
+              重新估值
+            </Button>
+          </Space>
+        }
+      >
         <Table 
           columns={columns} 
           dataSource={allCoefficients} 

@@ -130,6 +130,33 @@ export interface Version {
   at: string;
 }
 
+// Snapshot of one generated valuation (initial calculation or re-valuation)
+export type RecordKind = 'initial' | 'revalue';
+
+export interface ValuationRecord {
+  id: string;
+  at: string;
+  kind: RecordKind;
+  expert: Expert;
+  input: ValuationInput;
+  overrides: Record<string, any>;
+  result: ValuationResult;
+  evaluation: Evaluation | null;
+}
+
+// Persisted log entry for one expert coefficient adjustment
+export interface AdjustmentEntry {
+  id: string;
+  at: string;
+  expert: Expert;
+  hotel_name: string;
+  key: string;
+  old: number | string;
+  new: number;
+  reason: string;
+  recordId?: string;
+}
+
 // Full result with opinions and adjustments (§11.5)
 export interface FullValuationResult {
   result: ValuationResult;

@@ -6,6 +6,8 @@ import CoefficientAdjuster from './components/CoefficientAdjuster';
 import OpinionManager from './components/OpinionManager';
 import VersionHistory from './components/VersionHistory';
 import ExpertGate from './components/ExpertGate';
+import RecordsView from './components/RecordsView';
+import { downloadText } from './utils/download';
 import type { ValuationInput } from './types';
 import { useStore } from './stores';
 import { hasEvaluation } from './services/profile';
@@ -23,15 +25,19 @@ function App() {
     versions,
     currentVersionId,
     calculate,
+    revalue,
     addOpinion,
     updateOpinion,
     deleteOpinion,
     adjustCoefficient,
     createVersion,
     exportSkillPackage,
+    exportAdjustmentSubmission,
     expert,
+    experts,
+    adjustmentLog,
     evaluation,
-    registerExpert,
+    loginExpert,
     logoutExpert,
   } = useStore();
 
@@ -72,6 +78,25 @@ function App() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const handleRevalue = () => {
+    if (!result) {
+      alert('请先进行估值计算');
+      return;
+    }
+    revalue();
+  };
+
+  const handleExportAdjustments = () => {
+    const { json, csv, count } = exportAdjustmentSubmission();
+    if (count === 0) {
+      alert('暂无系数调整记录');
+      return;
+    }
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadText(`pamcap-coefficient-adjustments-${stamp}.json`, json);
+    downloadText(`pamcap-coefficient-adjustments-${stamp}.csv`, csv, 'text/csv');
   };
 
   return (
@@ -171,7 +196,11 @@ function App() {
                 children: (
                   <CoefficientAdjuster
                     baseline={{ ...baseline, ...overrides }}
+                    canRevalue={!!result}
+                    adjustmentCount={adjustmentLog.length}
                     onAdjustment={adjustCoefficient}
+                    onRevalue={handleRevalue}
+                    onExportAdjustments={handleExportAdjustments}
                   />
                 ),
               },
@@ -213,6 +242,11 @@ function App() {
                   </div>
                 ),
               },
+              {
+                key: 'records',
+                label: '记录',
+                children: <RecordsView />,
+              },
             ]}
           />
         </div>
@@ -228,7 +262,7 @@ function App() {
         </div>
       </Footer>
 
-      <ExpertGate open={!expert} onSubmit={registerExpert} />
+      <ExpertGate open={!expert} experts={experts} onSubmit={loginExpert} />
     </Layout>
   );
 }
