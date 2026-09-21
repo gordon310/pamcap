@@ -394,6 +394,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
         initialTab={drawerTab}
         onClose={() => setDrawerOpen(false)}
         onApply={handleAutoFillApply}
+        onPickHotelName={(name) => form.setFieldsValue({ hotel_name: name })}
       />
     </Card>
   );

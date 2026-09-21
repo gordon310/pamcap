@@ -30,6 +30,7 @@ interface AutoFillDrawerProps {
   initialTab?: 'map' | 'paste';
   onClose: () => void;
   onApply: (fields: AutoFillField[]) => void;
+  onPickHotelName?: (name: string) => void;
 }
 
 type EditableField = AutoFillField & { checked: boolean };
@@ -48,7 +49,7 @@ function toEditable(fields: AutoFillField[]): EditableField[] {
   return fields.map((f) => ({ ...f, checked: f.confidence !== 'low' }));
 }
 
-const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initialTab = 'map', onClose, onApply }) => {
+const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initialTab = 'map', onClose, onApply, onPickHotelName }) => {
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -98,6 +99,7 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
 
   const handleSelectPoi = (poi: AmapPoi) => {
     setSelectedPoiId(poi.id || poi.name);
+    onPickHotelName?.(poi.name);
     const result = classify(poi);
     setMapFields(toEditable(result.fields));
     setMapWarnings(result.warnings);
