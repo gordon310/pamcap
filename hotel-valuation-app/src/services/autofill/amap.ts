@@ -66,7 +66,7 @@ export function loadAmap(key: string, securityCode = ''): Promise<void> {
     const script = document.createElement('script');
     script.id = SCRIPT_ID;
     script.async = true;
-    script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(key)}&plugin=AMap.PlaceSearch`;
+    script.src = `https://webapi.amap.com/maps?v=2.0&key=${encodeURIComponent(key)}&plugin=AMap.PlaceSearch,AMap.Geocoder`;
     script.onload = () => resolve();
     script.onerror = () => {
       loadPromise = null;
@@ -76,6 +76,37 @@ export function loadAmap(key: string, securityCode = ''): Promise<void> {
   });
 
   return loadPromise;
+}
+
+export async function reverseGeocodeCity(
+  location: string,
+  key: string,
+  securityCode = '',
+): Promise<string> {
+  if (!location) return '';
+  if (!key.trim()) return '';
+
+  await loadAmap(key, securityCode);
+
+  return new Promise<string>((resolve, reject) => {
+    try {
+      if (!window.AMap?.Geocoder) {
+        reject(new Error('高德逆地理插件不可用'));
+        return;
+      }
+      const geocoder = new window.AMap.Geocoder();
+      geocoder.getAddress(location, (status: string, result: any) => {
+        if (status === 'complete' && result?.regeocode?.addressComponent) {
+          const component = result.regeocode.addressComponent;
+          resolve(component.city || component.province || '');
+        } else {
+          reject(new Error('高德逆地理编码失败'));
+        }
+      });
+    } catch (e) {
+      reject(e instanceof Error ? e : new Error('高德逆地理异常'));
+    }
+  });
 }
 
 export async function searchHotels(

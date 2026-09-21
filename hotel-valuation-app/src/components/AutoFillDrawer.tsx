@@ -17,8 +17,9 @@ import {
 } from 'antd';
 import { SearchOutlined, SettingOutlined } from '@ant-design/icons';
 import type { AmapPoi, AutoFillField } from '../services/autofill/types';
-import { searchHotels, getAmapKey, getAmapSecurityCode, saveAmapCredentials } from '../services/autofill/amap';
+import { searchHotels, reverseGeocodeCity, getAmapKey, getAmapSecurityCode, saveAmapCredentials } from '../services/autofill/amap';
 import { classify } from '../services/autofill/classify';
+import { getCityTier } from '../services/autofill/cityTier';
 import { parseHotelText } from '../services/autofill/pasteParser';
 import { getFieldOptions } from '../constants/valuationOptions';
 
@@ -97,12 +98,33 @@ const AutoFillDrawer: FC<AutoFillDrawerProps> = ({ open, defaultKeyword, initial
     }
   };
 
-  const handleSelectPoi = (poi: AmapPoi) => {
+  const handleSelectPoi = async (poi: AmapPoi) => {
     setSelectedPoiId(poi.id || poi.name);
     onPickHotelName?.(poi.name);
     const result = classify(poi);
     setMapFields(toEditable(result.fields));
     setMapWarnings(result.warnings);
+
+    // 酒店名/地址未能确定城市时，用 POI 坐标逆地理匹配城市
+    const cityField = result.fields.find((f) => f.key === 'city_tier');
+    if (cityField?.confidence === 'low' && poi.location) {
+      try {
+        const city = await reverseGeocodeCity(poi.location, getAmapKey(), getAmapSecurityCode());
+        const match = getCityTier(city);
+        if (match.confidence === 'high') {
+          setMapFields((prev) =>
+            prev.map((f) =>
+              f.key === 'city_tier'
+                ? { ...f, value: match.tier, confidence: 'high', source: `高德逆地理（${city}）` }
+                : f,
+            ),
+          );
+          setMapWarnings((prev) => prev.filter((w) => !w.includes('城市等级')));
+        }
+      } catch {
+        // 逆地理失败时保留 classify 结果
+      }
+    }
   };
 
   const handlePasteParse = () => {
