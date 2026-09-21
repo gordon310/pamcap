@@ -5,6 +5,7 @@ import { SearchOutlined, SnippetsOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { ValuationInput } from '../types';
 import type { AutoFillField } from '../services/autofill/types';
+import { percentToRatio } from '../utils/units';
 import AutoFillDrawer from './AutoFillDrawer';
 
 const { Option } = Select;
@@ -56,8 +57,8 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
       property_type: values.property_type,
       operation_mode: values.operation_mode,
       ctrip_adr: values.ctrip_adr,
-      occupancy_input: values.occupancy_input,
-      fb_ratio: values.fb_ratio,
+      occupancy_input: percentToRatio(values.occupancy_input),
+      fb_ratio: percentToRatio(values.fb_ratio),
       owner_ebitda: values.owner_ebitda || undefined,
       other_income: values.other_income || 0,
       capex_type: values.capex_type,
@@ -239,18 +240,19 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           <Col xs={24} md={12}>
             <Form.Item
               name="occupancy_input"
-              label="全年出租率（业主填报）"
+              label="全年出租率（%）"
               rules={[
                 { required: true, message: '请输入全年出租率' },
-                { type: 'number', min: 0, max: 1, message: '出租率应在0-1之间' }
+                { type: 'number', min: 0, max: 100, message: '出租率应在0-100之间' }
               ]}
             >
               <InputNumber 
                 min={0} 
-                max={1} 
-                step={0.01}
+                max={100} 
+                step={0.1}
+                suffix="%"
                 style={{ width: '100%' }} 
-                placeholder="0-1之间，如0.7表示70%" 
+                placeholder="0-100，如70表示70%" 
               />
             </Form.Item>
           </Col>
@@ -260,12 +262,13 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           <Col xs={24} md={12}>
             <Form.Item
               name="fb_ratio"
-              label="客房餐饮收入比"
+              label="客房餐饮收入比（%）"
               rules={[{ required: true, message: '请输入客房餐饮收入比' }, { type: 'number', min: 0, message: '比例必须大于等于0' }]}
             >
               <InputNumber 
                 min={0} 
-                step={0.01}
+                step={0.1}
+                suffix="%"
                 style={{ width: '100%' }} 
                 placeholder="餐饮收入 ÷ 客房收入" 
               />

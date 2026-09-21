@@ -223,6 +223,9 @@ function App() {
         <div style={{ color: '#8c8c8c', fontSize: 12 }}>
           酒店资产估值验证应用（专家版）©{new Date().getFullYear()} · 仅供内部预估/验证
         </div>
+        <div style={{ color: '#bfbfbf', fontSize: 11, marginTop: 4 }}>
+          版本 {__BUILD_INFO__.sha} · {new Date(__BUILD_INFO__.time).toLocaleString('zh-CN', { hour12: false })}
+        </div>
       </Footer>
 
       <ExpertGate open={!expert} onSubmit={registerExpert} />
