@@ -108,6 +108,29 @@ describe('Valuation Engine Tests', () => {
     expect(resultCBD.valuation.range.base).toBeGreaterThan(resultOther.valuation.range.base);
   });
 
+  test('只返回本次估值实际使用的基准系数路径', () => {
+    const result = calculateValuation(goldenSampleInput);
+    const used = result.usedCoefficients;
+    expect(used).toContain('adr.ctrip_discount');
+    expect(used).toContain('occupancy.bias_correction');
+    expect(used).toContain('cap_rate_base.by_segment.S3');
+    expect(used).toContain('gop_rate.by_property_type_adj.P1');
+    expect(used).toContain('location_coefficient.table.一线.CBD');
+    expect(used).toContain('owner_expense_coef.by_segment.S3');
+    expect(used).not.toContain('cap_rate_base.by_segment.S1');
+    expect(used).not.toContain('cost_approach.depreciation_rate');
+    expect(used).not.toContain('financing.loan_tenor_years');
+  });
+
+  test('其他收入为0时纳入 other_income_default，非0时不纳入', () => {
+    expect(calculateValuation({ ...goldenSampleInput, other_income: 0 }).usedCoefficients).toContain(
+      'revenue.other_income_default',
+    );
+    expect(calculateValuation({ ...goldenSampleInput, other_income: 5 }).usedCoefficients).not.toContain(
+      'revenue.other_income_default',
+    );
+  });
+
   test('should handle missing optional fields with defaults', () => {
     const minimalInput: ValuationInput = {
       hotel_name: 'Test Hotel',

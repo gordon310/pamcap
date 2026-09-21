@@ -195,7 +195,9 @@ function App() {
                 disabled: !baseline,
                 children: (
                   <CoefficientAdjuster
-                    baseline={{ ...baseline, ...overrides }}
+                    baseline={baseline}
+                    overrides={overrides}
+                    usedPaths={result?.usedCoefficients}
                     canRevalue={!!result}
                     adjustmentCount={adjustmentLog.length}
                     onAdjustment={adjustCoefficient}

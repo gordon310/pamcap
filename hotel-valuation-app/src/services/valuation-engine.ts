@@ -40,6 +40,7 @@ export const calculateValuation = (
   const currentBaseline = { ...baseline, ...overrides } as Baseline;
   
   const trace: TraceItem[] = [];
+  const used = new Set<string>();
   let metrics: any = {};
   let valuation: any = {};
 
@@ -78,6 +79,7 @@ export const calculateValuation = (
   }
 
   // S1: ADR
+  used.add('adr.ctrip_discount');
   const adr = input.ctrip_adr * currentBaseline.adr.ctrip_discount;
   trace.push({
     step: 'S1',
@@ -93,6 +95,7 @@ export const calculateValuation = (
   metrics.adr = adr;
 
   // S2: OCC
+  used.add('occupancy.bias_correction');
   const occ = input.occupancy_input * currentBaseline.occupancy.bias_correction;
   trace.push({
     step: 'S2',
@@ -123,6 +126,7 @@ export const calculateValuation = (
   metrics.revpar = revpar;
 
   // S4: 客房收入
+  used.add('revenue.days_per_year');
   const daysPerYear = currentBaseline.revenue.days_per_year;
   const roomRev = revpar * input.rooms * daysPerYear / 10000; // Convert to 万元
   trace.push({
@@ -152,6 +156,7 @@ export const calculateValuation = (
   });
 
   // S6: GOR
+  if (!input.other_income) used.add('revenue.other_income_default');
   const otherIncome = input.other_income || currentBaseline.revenue.other_income_default;
   const gor = roomRev + fbRev + otherIncome;
   trace.push({
@@ -168,6 +173,8 @@ export const calculateValuation = (
   metrics.gor = gor;
 
   // S7: GOP
+  used.add(`gop_rate.by_segment.${segment}`);
+  used.add(`gop_rate.by_property_type_adj.${propertyType}`);
   const gopRateSegment = currentBaseline.gop_rate.by_segment[segment] || 0.26;
   const gopRatePropertyAdj = currentBaseline.gop_rate.by_property_type_adj[propertyType] || 0;
   const gopRate = gopRateSegment + gopRatePropertyAdj;
@@ -186,6 +193,7 @@ export const calculateValuation = (
   metrics.gop = gop;
 
   // S8: FF&E
+  used.add('cost_rates.ffe_rate');
   const ffeRate = currentBaseline.cost_rates.ffe_rate;
   const ffe = gor * ffeRate;
   trace.push({
@@ -201,6 +209,7 @@ export const calculateValuation = (
   });
 
   // S9: 管理费
+  used.add('cost_rates.management_fee_rate');
   const managementFeeRate = currentBaseline.cost_rates.management_fee_rate;
   const mgmtFee = gor * managementFeeRate;
   trace.push({
@@ -216,6 +225,7 @@ export const calculateValuation = (
   });
 
   // S10: 物业税
+  used.add('cost_rates.property_tax_rate');
   const propertyTaxRate = currentBaseline.cost_rates.property_tax_rate;
   const propTax = gor * propertyTaxRate;
   trace.push({
@@ -231,6 +241,7 @@ export const calculateValuation = (
   });
 
   // S11: 保险
+  used.add('cost_rates.insurance_rate');
   const insuranceRate = currentBaseline.cost_rates.insurance_rate;
   const insurance = gor * insuranceRate;
   trace.push({
@@ -261,6 +272,7 @@ export const calculateValuation = (
   metrics.noi = noi;
 
   // S13: 业主费用
+  used.add(`owner_expense_coef.by_segment.${segment}`);
   const ownerExpenseCoef = currentBaseline.owner_expense_coef.by_segment[segment] || 0.02;
   const ownerExp = gor * ownerExpenseCoef;
   trace.push({
@@ -313,6 +325,7 @@ export const calculateValuation = (
   metrics.owner_ebitda = input.owner_ebitda;
 
   // S16: 地段系数
+  used.add(`location_coefficient.table.${cityTier}.${location}`);
   const locationCoefficientTable = currentBaseline.location_coefficient.table;
   const locCoef = locationCoefficientTable[cityTier]?.[location] || 1.0;
   trace.push({
@@ -329,6 +342,7 @@ export const calculateValuation = (
   metrics.location_coef = locCoef;
 
   // S17: Cap Rate（地段越优 → loc_coef 越大 → Cap Rate 越低 → 估值越高）
+  used.add(`cap_rate_base.by_segment.${segment}`);
   const capRateBase = currentBaseline.cap_rate_base.by_segment[segment] || 0.055;
   const cap = capRateBase / locCoef;
   trace.push({
@@ -359,6 +373,7 @@ export const calculateValuation = (
   });
 
   // S19: 倍数法估值
+  used.add(`ebitda_multiple.by_segment.${segment}`);
   const ebitdaMultipleRange = currentBaseline.ebitda_multiple.by_segment[segment] || [20, 25];
   const ebitdaMultipleMid = (ebitdaMultipleRange[0] + ebitdaMultipleRange[1]) / 2;
   const vMultiple = ebitdaUsed * ebitdaMultipleMid;
@@ -391,6 +406,10 @@ export const calculateValuation = (
 
   // S21: 估值区间 (Conservative/Base/Optimistic)
   // Apply scenario adjustments to calculate ranges
+  used.add('scenario.adr_delta');
+  used.add('scenario.occ_delta');
+  used.add('scenario.cap_delta_bps');
+  used.add('scenario.multiple_delta');
   const adrConservative = adr * (1 - currentBaseline.scenario.adr_delta);
   const adrOptimistic = adr * (1 + currentBaseline.scenario.adr_delta);
   const occConservative = Math.max(0, occ - currentBaseline.scenario.occ_delta);
@@ -439,6 +458,7 @@ export const calculateValuation = (
   });
 
   // S22: DSCR (Debt Service Coverage Ratio)
+  used.add('financing.interest_rate');
   const debt = totalInvestment - input.equity;
   const annualDebtService = debt * currentBaseline.financing.interest_rate; // Simplified calculation
   const dscr = noi / annualDebtService || 0; // Handle division by zero
@@ -491,6 +511,7 @@ export const calculateValuation = (
     metrics,
     valuation,
     trace,
+    usedCoefficients: [...used],
     warnings: [] // Would add warnings based on validation in a full implementation
   };
 

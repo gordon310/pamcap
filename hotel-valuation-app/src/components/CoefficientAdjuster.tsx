@@ -1,10 +1,21 @@
 import { useState } from 'react';
 import type { FC } from 'react';
-import { Card, Table, InputNumber, Button, Space, Modal, Input, Badge } from 'antd';
+import { Card, Table, InputNumber, Button, Space, Modal, Input, Badge, Alert, Typography } from 'antd';
 import { EditOutlined, CalculatorOutlined, DownloadOutlined } from '@ant-design/icons';
+import { coefficientLabel } from '../constants/coefficientLabels';
+
+const { Text } = Typography;
+
+interface CoefficientRow {
+  path: string;
+  label: string;
+  value: number;
+}
 
 interface CoefficientAdjusterProps {
   baseline: Record<string, any>;
+  overrides: Record<string, any>;
+  usedPaths?: string[];
   canRevalue: boolean;
   adjustmentCount: number;
   onAdjustment: (keyPath: string, newValue: number, reason: string) => void;
@@ -12,8 +23,14 @@ interface CoefficientAdjusterProps {
   onExportAdjustments: () => void;
 }
 
+function getByPath(obj: any, path: string): any {
+  return path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), obj);
+}
+
 const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({
   baseline,
+  overrides,
+  usedPaths,
   canRevalue,
   adjustmentCount,
   onAdjustment,
@@ -25,27 +42,18 @@ const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({
   const [reason, setReason] = useState<string>('');
   const [showModal, setShowModal] = useState<boolean>(false);
 
-  // Flatten the baseline object to extract all numeric coefficients
-  const flattenObject = (obj: any, prefix: string = ''): Array<{ key: string; value: number; path: string }> => {
-    const flattened: Array<{ key: string; value: number; path: string }> = [];
+  const rows: CoefficientRow[] = [];
+  const seen = new Set<string>();
+  for (const path of usedPaths || []) {
+    if (seen.has(path)) continue;
+    seen.add(path);
+    const override = getByPath(overrides, path);
+    const value = typeof override === 'number' ? override : getByPath(baseline, path);
+    if (typeof value !== 'number' || !isFinite(value)) continue;
+    rows.push({ path, label: coefficientLabel(path), value });
+  }
 
-    Object.keys(obj).forEach(key => {
-      const value = obj[key];
-      const newPath = prefix ? `${prefix}.${key}` : key;
-
-      if (typeof value === 'number') {
-        flattened.push({ key, value, path: newPath });
-      } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        flattened.push(...flattenObject(value, newPath));
-      }
-    });
-
-    return flattened;
-  };
-
-  const allCoefficients = flattenObject(baseline);
-
-  const handleEditClick = (record: { path: string; value: number }) => {
+  const handleEditClick = (record: CoefficientRow) => {
     setEditingKey(record.path);
     setNewValue(record.value);
     setShowModal(true);
@@ -70,28 +78,29 @@ const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({
 
   const columns = [
     {
-      title: '系数路径',
-      dataIndex: 'path',
-      key: 'path',
-      width: '40%',
+      title: '系数说明',
+      key: 'label',
+      width: '50%',
+      render: (_: unknown, record: CoefficientRow) => (
+        <div>
+          <div>{record.label}</div>
+          <Text type="secondary" style={{ fontSize: 11 }}>{record.path}</Text>
+        </div>
+      ),
     },
     {
       title: '当前值',
       dataIndex: 'value',
       key: 'value',
+      width: '22%',
       render: (value: number) => value.toFixed(4),
-      width: '20%',
     },
     {
       title: '操作',
       key: 'action',
-      width: '20%',
-      render: (_: any, record: { path: string; value: number }) => (
-        <Button 
-          type="primary" 
-          icon={<EditOutlined />} 
-          onClick={() => handleEditClick(record)}
-        >
+      width: '28%',
+      render: (_: unknown, record: CoefficientRow) => (
+        <Button type="primary" icon={<EditOutlined />} onClick={() => handleEditClick(record)}>
           调整
         </Button>
       ),
@@ -101,7 +110,7 @@ const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({
   return (
     <div>
       <Card
-        title="基准系数管理"
+        title="本次估值系数"
         extra={
           <Space wrap>
             <Badge count={adjustmentCount} size="small" offset={[-2, 2]}>
@@ -124,18 +133,26 @@ const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({
           </Space>
         }
       >
-        <Table 
-          columns={columns} 
-          dataSource={allCoefficients} 
-          rowKey="path"
-          pagination={{ pageSize: 10 }}
-          size="small"
-          scroll={{ x: 'max-content' }}
-        />
+        {rows.length === 0 ? (
+          <Alert
+            type="info"
+            showIcon
+            message="请先在「输入」页完成一次估值计算，这里只显示本次实际参与计算的系数。"
+          />
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={rows}
+            rowKey="path"
+            pagination={false}
+            size="small"
+            scroll={{ x: 'max-content' }}
+          />
+        )}
       </Card>
 
       <Modal
-        title={`调整系数: ${editingKey}`}
+        title={`调整系数: ${editingKey ? coefficientLabel(editingKey) : ''}`}
         open={showModal}
         onOk={handleSave}
         onCancel={handleCancel}
@@ -144,20 +161,20 @@ const CoefficientAdjuster: FC<CoefficientAdjusterProps> = ({
       >
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>
-            <div>当前值: {editingKey ? allCoefficients.find(c => c.path === editingKey)?.value.toFixed(4) : ''}</div>
+            <div>当前值: {editingKey ? rows.find((c) => c.path === editingKey)?.value.toFixed(4) : ''}</div>
             <div>新值:</div>
-            <InputNumber 
-              value={newValue} 
-              onChange={(val) => setNewValue(val || 0)} 
+            <InputNumber
+              value={newValue}
+              onChange={(val) => setNewValue(val || 0)}
               style={{ width: '100%' }}
               precision={6}
             />
           </div>
           <div>
             <div>调整原因:</div>
-            <Input.TextArea 
-              value={reason} 
-              onChange={(e) => setReason(e.target.value)} 
+            <Input.TextArea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
               rows={3}
               placeholder="请输入调整原因..."
             />

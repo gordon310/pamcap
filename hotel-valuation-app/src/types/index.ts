@@ -87,6 +87,7 @@ export interface ValuationResult {
   };
   trace: TraceItem[];
   warnings: string[];
+  usedCoefficients: string[];
 }
 
 // Expert identity (lightweight registration)
