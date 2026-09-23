@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import { Modal, Form, Input, Typography, Tag, Space } from 'antd';
+import { Modal, Form, Input, Typography } from 'antd';
 import { UserOutlined, MailOutlined } from '@ant-design/icons';
 import type { Expert } from '../types';
 import { isValidEmail } from '../services/profile';
@@ -37,27 +37,7 @@ const ExpertGate: FC<ExpertGateProps> = ({ open, experts, onSubmit }) => {
       maskClosable={false}
       keyboard={false}
     >
-      <Text type="secondary">请填写姓名与邮箱；已登记专家点击下方标签可直接进入，未登记将自动加入。</Text>
-
-      {experts.length > 0 && (
-        <div style={{ marginTop: 12 }}>
-          <Text type="secondary" style={{ fontSize: 12 }}>点击直接进入：</Text>
-          <div style={{ marginTop: 6 }}>
-            <Space size={[4, 4]} wrap>
-              {experts.map((e) => (
-                <Tag
-                  key={`${e.name}|${e.email}`}
-                  color={e.role === 'admin' ? 'gold' : undefined}
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => submit(e)}
-                >
-                  {e.name}
-                </Tag>
-              ))}
-            </Space>
-          </div>
-        </div>
-      )}
+      <Text type="secondary">请填写姓名与邮箱；未登记将自动加入。</Text>
 
       <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
         <Form.Item
