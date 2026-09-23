@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Layout, theme, Button, Tabs, Grid, Space } from 'antd';
+import { Layout, theme, Button, Tabs, Grid, Space, Popover } from 'antd';
 import InputForm from './components/InputForm';
 import ResultsView from './components/ResultsView';
 import CoefficientAdjuster from './components/CoefficientAdjuster';
@@ -13,12 +13,13 @@ import { mergeExperts, isSuperUser, parseExpertsJson } from './services/records'
 import type { ValuationInput } from './types';
 import { useStore } from './stores';
 import { hasEvaluation } from './services/profile';
-import { ExportOutlined, UserSwitchOutlined } from '@ant-design/icons';
+import { ExportOutlined, UserSwitchOutlined, LogoutOutlined } from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 
 function App() {
   const [activeMainTab, setActiveMainTab] = useState<'input' | 'results' | 'coefficients' | 'opinions' | 'versions'>('input');
+  const [expertOpen, setExpertOpen] = useState(false);
   const {
     result,
     baseline,
@@ -158,15 +159,40 @@ function App() {
         </div>
         <Space size={4}>
           {expert && (
-            <Button
-              type="text"
-              size="small"
-              icon={<UserSwitchOutlined />}
-              onClick={logoutExpert}
-              title={`当前专家：${expert.name}（${expert.email}）`}
+            <Popover
+              open={expertOpen}
+              onOpenChange={setExpertOpen}
+              trigger="click"
+              placement="bottomRight"
+              content={
+                <Space direction="vertical" size={8} style={{ minWidth: 180 }}>
+                  <div>
+                    <div style={{ fontWeight: 600 }}>{expert.name}</div>
+                    <div style={{ color: '#8c8c8c', fontSize: 12 }}>{expert.email}</div>
+                  </div>
+                  <Space>
+                    <Button
+                      danger
+                      size="small"
+                      icon={<LogoutOutlined />}
+                      onClick={() => {
+                        logoutExpert();
+                        setExpertOpen(false);
+                      }}
+                    >
+                      退出登录
+                    </Button>
+                    <Button size="small" onClick={() => setExpertOpen(false)}>
+                      返回
+                    </Button>
+                  </Space>
+                </Space>
+              }
             >
-              {isMobile ? '' : expert.name}
-            </Button>
+              <Button type="text" size="small" icon={<UserSwitchOutlined />}>
+                {isMobile ? '' : expert.name}
+              </Button>
+            </Popover>
           )}
           {result && (
             <Button
