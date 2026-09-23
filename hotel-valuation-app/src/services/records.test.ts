@@ -13,6 +13,9 @@ import {
   saveExperts,
   loadAdjustments,
   saveAdjustments,
+  mergeExperts,
+  isSuperUser,
+  parseExpertsJson,
   RECORDS_KEY,
   EXPERTS_KEY,
   ADJUSTMENTS_KEY,
@@ -129,6 +132,29 @@ describe('parseImport', () => {
 
   test('非法 JSON 返回空对象', () => {
     expect(parseImport('not-json')).toEqual({});
+  });
+});
+
+describe('expert registry helpers', () => {
+  test('mergeExperts 按邮箱去重并保留管理员角色', () => {
+    const remote = [expert('gordon', 'A@qq.com')].map((e) => ({ ...e, role: 'admin' as const }));
+    const local = [expert('gordon', 'a@qq.com'), expert('张三', 'z@example.com')];
+    const merged = mergeExperts(remote, local);
+    expect(merged).toHaveLength(2);
+    expect(merged.find((e) => e.email.toLowerCase() === 'a@qq.com')?.role).toBe('admin');
+  });
+
+  test('isSuperUser 命中 admin', () => {
+    const list = [{ name: 'gordon', email: 'A@qq.com', role: 'admin' as const }];
+    expect(isSuperUser(expert('gordon', 'a@qq.com'), list)).toBe(true);
+    expect(isSuperUser(expert('张三', 'z@example.com'), list)).toBe(false);
+    expect(isSuperUser(expert('x', 'x@example.com'), [])).toBe(false);
+  });
+
+  test('parseExpertsJson 支持对象与数组', () => {
+    expect(parseExpertsJson('{"experts":[{"name":"gordon","email":"a@qq.com","role":"admin"}]}')).toHaveLength(1);
+    expect(parseExpertsJson('[{"name":"a","email":"a@example.com"}]')).toHaveLength(1);
+    expect(parseExpertsJson('nope')).toEqual([]);
   });
 });
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Layout, theme, Button, Tabs, Grid, Space } from 'antd';
 import InputForm from './components/InputForm';
 import ResultsView from './components/ResultsView';
@@ -7,7 +7,9 @@ import OpinionManager from './components/OpinionManager';
 import VersionHistory from './components/VersionHistory';
 import ExpertGate from './components/ExpertGate';
 import RecordsView from './components/RecordsView';
+import ExpertsView from './components/ExpertsView';
 import { downloadText } from './utils/download';
+import { mergeExperts, isSuperUser, parseExpertsJson } from './services/records';
 import type { ValuationInput } from './types';
 import { useStore } from './stores';
 import { hasEvaluation } from './services/profile';
@@ -35,11 +37,27 @@ function App() {
     exportAdjustmentSubmission,
     expert,
     experts,
+    remoteExperts,
     adjustmentLog,
     evaluation,
     loginExpert,
+    loadRemoteExperts,
     logoutExpert,
   } = useStore();
+
+  const allExperts = useMemo(() => mergeExperts(remoteExperts, experts), [remoteExperts, experts]);
+  const isAdmin = expert ? isSuperUser(expert, allExperts) : false;
+
+  useEffect(() => {
+    fetch(`${import.meta.env.BASE_URL}experts.json`)
+      .then((r) => (r.ok ? r.text() : ''))
+      .then((text) => {
+        if (text) loadRemoteExperts(parseExpertsJson(text));
+      })
+      .catch(() => {
+        // 名单文件缺失时忽略，使用本机名单
+      });
+  }, [loadRemoteExperts]);
 
   const screens = Grid.useBreakpoint();
   const isMobile = !screens.md;
@@ -249,6 +267,9 @@ function App() {
                 label: '记录',
                 children: <RecordsView />,
               },
+              ...(isAdmin
+                ? [{ key: 'experts', label: '专家', children: <ExpertsView /> }]
+                : []),
             ]}
           />
         </div>
@@ -264,7 +285,7 @@ function App() {
         </div>
       </Footer>
 
-      <ExpertGate open={!expert} experts={experts} onSubmit={loginExpert} />
+      <ExpertGate open={!expert} experts={allExperts} onSubmit={loginExpert} />
     </Layout>
   );
 }

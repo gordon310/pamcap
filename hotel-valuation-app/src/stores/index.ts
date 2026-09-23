@@ -39,6 +39,7 @@ interface AppState {
   currentVersionId: string | null;
   expert: Expert | null;
   experts: Expert[];
+  remoteExperts: Expert[];
   evaluation: Evaluation | null;
   records: ValuationRecord[];
   adjustmentLog: AdjustmentEntry[];
@@ -54,6 +55,7 @@ interface AppState {
   setCurrentVersion: (versionId: string) => void;
   loginExpert: (expert: Expert) => void;
   registerExpert: (expert: Expert) => void;
+  loadRemoteExperts: (experts: Expert[]) => void;
   logoutExpert: () => void;
   setEvaluation: (content: string) => void;
   deleteRecord: (id: string) => void;
@@ -96,6 +98,7 @@ export const useStore = create<AppState>((set, get) => ({
   currentVersionId: null,
   expert: loadExpert(),
   experts: loadExperts(),
+  remoteExperts: [],
   evaluation: null,
   records: loadRecords(),
   adjustmentLog: loadAdjustments(),
@@ -148,6 +151,10 @@ export const useStore = create<AppState>((set, get) => ({
 
   registerExpert: (expert: Expert) => {
     get().loginExpert(expert);
+  },
+
+  loadRemoteExperts: (experts: Expert[]) => {
+    set({ remoteExperts: experts });
   },
 
   logoutExpert: () => {

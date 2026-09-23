@@ -94,6 +94,7 @@ export interface ValuationResult {
 export interface Expert {
   name: string;
   email: string;
+  role?: 'admin' | 'expert';
 }
 
 // Required expert evaluation after a valuation is produced

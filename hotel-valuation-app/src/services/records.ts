@@ -73,6 +73,44 @@ export function upsertExpert(experts: Expert[], expert: Expert): Expert[] {
   return [...experts, { name: expert.name.trim(), email: expert.email.trim() }];
 }
 
+export function mergeExperts(...lists: Expert[][]): Expert[] {
+  const map = new Map<string, Expert>();
+  for (const list of lists) {
+    for (const e of list) {
+      const key = (e.email || '').trim().toLowerCase();
+      if (!key) continue;
+      const prev = map.get(key);
+      if (!prev) {
+        map.set(key, { name: e.name, email: e.email, role: e.role });
+      } else if (e.role === 'admin' && prev.role !== 'admin') {
+        map.set(key, { ...prev, role: 'admin' });
+      }
+    }
+  }
+  return [...map.values()];
+}
+
+export function findExpert(expert: Expert, experts: Expert[]): Expert | undefined {
+  const email = (expert.email || '').trim().toLowerCase();
+  return experts.find((e) => (e.email || '').trim().toLowerCase() === email);
+}
+
+export function isSuperUser(expert: Expert, experts: Expert[]): boolean {
+  return findExpert(expert, experts)?.role === 'admin';
+}
+
+export function parseExpertsJson(text: string): Expert[] {
+  try {
+    const parsed = JSON.parse(text);
+    const list = Array.isArray(parsed) ? parsed : Array.isArray(parsed?.experts) ? parsed.experts : [];
+    return (list as any[])
+      .filter((e) => e && typeof e.name === 'string' && typeof e.email === 'string')
+      .map((e) => ({ name: e.name, email: e.email, role: e.role === 'admin' ? 'admin' : 'expert' }));
+  } catch {
+    return [];
+  }
+}
+
 function serializedSize(records: ValuationRecord[]): number {
   return JSON.stringify(records).length;
 }

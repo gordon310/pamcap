@@ -19,7 +19,7 @@ import {
 import { DownloadOutlined, UploadOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ValuationRecord } from '../types';
 import { useStore } from '../stores';
-import { parseImport } from '../services/records';
+import { parseImport, mergeExperts, isSuperUser } from '../services/records';
 import { downloadText, readTextFile } from '../utils/download';
 
 const { Text, Paragraph } = Typography;
@@ -29,11 +29,16 @@ const kindLabel = (kind: string) => (kind === 'revalue' ? '重新估值' : '生�
 const RecordsView: FC = () => {
   const records = useStore((s) => s.records);
   const experts = useStore((s) => s.experts);
+  const remoteExperts = useStore((s) => s.remoteExperts);
+  const currentExpert = useStore((s) => s.expert);
   const adjustmentLog = useStore((s) => s.adjustmentLog);
   const lastPruned = useStore((s) => s.lastPruned);
   const deleteRecord = useStore((s) => s.deleteRecord);
   const importRecords = useStore((s) => s.importRecords);
   const { message } = AntApp.useApp();
+
+  const allExperts = useMemo(() => mergeExperts(remoteExperts, experts), [remoteExperts, experts]);
+  const isSuper = currentExpert ? isSuperUser(currentExpert, allExperts) : false;
 
   const [expertFilter, setExpertFilter] = useState<string | undefined>(undefined);
   const [keyword, setKeyword] = useState('');
@@ -41,8 +46,10 @@ const RecordsView: FC = () => {
 
   const filtered = useMemo(() => {
     const kw = keyword.trim();
+    const currentEmail = (currentExpert?.email || '').trim().toLowerCase();
     return records
       .filter((r) => {
+        if (!isSuper && (r.expert?.email || '').trim().toLowerCase() !== currentEmail) return false;
         const key = `${r.expert?.name}|${r.expert?.email}`;
         const matchExpert = !expertFilter || key === expertFilter;
         const matchKeyword = !kw || (r.input?.hotel_name || '').includes(kw);
@@ -50,7 +57,7 @@ const RecordsView: FC = () => {
       })
       .slice()
       .sort((a, b) => b.at.localeCompare(a.at));
-  }, [records, expertFilter, keyword]);
+  }, [records, expertFilter, keyword, isSuper, currentExpert]);
 
   const exportBundle = () => {
     downloadText(
@@ -113,16 +120,18 @@ const RecordsView: FC = () => {
       key: 'action',
       width: 150,
       render: (_: unknown, r: ValuationRecord) => (
-        <Space>
-          <Button type="link" icon={<EyeOutlined />} onClick={() => setViewing(r)}>
-            查看
-          </Button>
-          <Popconfirm title="确认删除该记录？" onConfirm={() => deleteRecord(r.id)} okText="删除" cancelText="取消">
-            <Button type="link" danger icon={<DeleteOutlined />}>
-              删除
+        <div onClick={(e) => e.stopPropagation()}>
+          <Space>
+            <Button type="link" icon={<EyeOutlined />} onClick={() => setViewing(r)}>
+              查看
             </Button>
-          </Popconfirm>
-        </Space>
+            <Popconfirm title="确认删除该记录？" onConfirm={() => deleteRecord(r.id)} okText="删除" cancelText="取消">
+              <Button type="link" danger icon={<DeleteOutlined />}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        </div>
       ),
     },
   ];
@@ -177,6 +186,10 @@ const RecordsView: FC = () => {
           pagination={{ pageSize: 10 }}
           scroll={{ x: 'max-content' }}
           locale={{ emptyText: '暂无记录，先去做一次估值计算。' }}
+          onRow={(record) => ({
+            onClick: () => setViewing(record),
+            style: { cursor: 'pointer' },
+          })}
         />
       </Card>
 
@@ -221,6 +234,42 @@ const RecordsView: FC = () => {
                 </pre>
               </Paragraph>
             </div>
+
+            {(() => {
+              const related = adjustmentLog.filter(
+                (a) =>
+                  a.recordId === viewing.id ||
+                  (a.hotel_name === viewing.input?.hotel_name &&
+                    (a.expert?.email || '').toLowerCase() === (viewing.expert?.email || '').toLowerCase()),
+              );
+              return (
+                <div>
+                  <Text strong>系数调整过程（{related.length}）</Text>
+                  {related.length === 0 ? (
+                    <Paragraph type="secondary" style={{ marginBottom: 0 }}>（无）</Paragraph>
+                  ) : (
+                    <Table
+                      rowKey="id"
+                      size="small"
+                      pagination={false}
+                      dataSource={related}
+                      columns={[
+                        {
+                          title: '时间',
+                          dataIndex: 'at',
+                          width: 150,
+                          render: (v: string) => new Date(v).toLocaleString('zh-CN', { hour12: false }),
+                        },
+                        { title: '系数', dataIndex: 'key' },
+                        { title: '原值', dataIndex: 'old' },
+                        { title: '新值', dataIndex: 'new' },
+                        { title: '原因', dataIndex: 'reason' },
+                      ]}
+                    />
+                  )}
+                </div>
+              );
+            })()}
           </Space>
         )}
       </Drawer>
