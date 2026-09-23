@@ -1,7 +1,25 @@
+import { useState } from 'react';
 import type { FC } from 'react';
-import { Card, Table, Tabs, Statistic, Row, Col, Descriptions, Typography } from 'antd';
-import type { ValuationResult } from '../types';
+import {
+  Card,
+  Table,
+  Tabs,
+  Statistic,
+  Row,
+  Col,
+  Descriptions,
+  Typography,
+  Button,
+  Modal,
+  InputNumber,
+  Input,
+  Space,
+} from 'antd';
+import { EditOutlined } from '@ant-design/icons';
+import type { TraceItem, ValuationResult } from '../types';
 import { useStore } from '../stores';
+import { coefficientLabel } from '../constants/coefficientLabels';
+import { coefficientPathsForStep } from '../constants/traceCoefficients';
 import EvaluationPanel from './EvaluationPanel';
 
 const { Title, Text } = Typography;
@@ -10,8 +28,15 @@ interface ResultsViewProps {
   result: ValuationResult | null;
 }
 
+function getByPath(obj: any, path: string): any {
+  return path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), obj);
+}
+
 const ResultsView: FC<ResultsViewProps> = ({ result }) => {
-  const { expert, evaluation, setEvaluation } = useStore();
+  const { expert, evaluation, setEvaluation, input, baseline, overrides, adjustCoefficient } = useStore();
+  const [adjustStep, setAdjustStep] = useState<TraceItem | null>(null);
+  const [adjustValues, setAdjustValues] = useState<Record<string, number>>({});
+  const [adjustReason, setAdjustReason] = useState('');
 
   if (!result) {
     return (
@@ -20,6 +45,35 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
       </Card>
     );
   }
+
+  const currentValue = (path: string): number => {
+    const override = getByPath(overrides, path);
+    const value = typeof override === 'number' ? override : getByPath(baseline, path);
+    return typeof value === 'number' ? value : 0;
+  };
+
+  const openAdjust = (row: TraceItem) => {
+    const paths = coefficientPathsForStep(row.step, input);
+    const values: Record<string, number> = {};
+    paths.forEach((p) => {
+      values[p] = currentValue(p);
+    });
+    setAdjustValues(values);
+    setAdjustReason('');
+    setAdjustStep(row);
+  };
+
+  const saveAdjust = () => {
+    if (!adjustStep || !adjustReason.trim()) return;
+    coefficientPathsForStep(adjustStep.step, input).forEach((p) => {
+      if (adjustValues[p] !== currentValue(p)) {
+        adjustCoefficient(p, adjustValues[p], adjustReason);
+      }
+    });
+    setAdjustStep(null);
+  };
+
+  const adjustPaths = adjustStep ? coefficientPathsForStep(adjustStep.step, input) : [];
 
   // Metrics columns for the table
   const metricsColumns = [
@@ -73,6 +127,17 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
     { title: '结果', dataIndex: 'result', key: 'result', render: (val: number) => val.toFixed(4) },
     { title: '来源', dataIndex: 'source', key: 'source' },
     { title: '备注', dataIndex: 'note', key: 'note' },
+    {
+      title: '操作',
+      key: 'action',
+      width: 90,
+      render: (_: unknown, row: TraceItem) =>
+        coefficientPathsForStep(row.step, input).length > 0 ? (
+          <Button type="link" icon={<EditOutlined />} onClick={() => openAdjust(row)}>
+            调整
+          </Button>
+        ) : null,
+    },
   ];
 
   return (
@@ -189,6 +254,40 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
           },
         ]}
       />
+
+      <Modal
+        title={`调整系数 - ${adjustStep?.name || ''}（${adjustStep?.step || ''}）`}
+        open={!!adjustStep}
+        onOk={saveAdjust}
+        onCancel={() => setAdjustStep(null)}
+        okText="保存并重算"
+        cancelText="取消"
+        okButtonProps={{ disabled: !adjustReason.trim() }}
+      >
+        <Space direction="vertical" style={{ width: '100%' }}>
+          {adjustPaths.map((path) => (
+            <div key={path}>
+              <div>{coefficientLabel(path)}</div>
+              <Text type="secondary" style={{ fontSize: 11 }}>{path}</Text>
+              <InputNumber
+                value={adjustValues[path]}
+                onChange={(val) => setAdjustValues((prev) => ({ ...prev, [path]: val || 0 }))}
+                style={{ width: '100%' }}
+                precision={6}
+              />
+            </div>
+          ))}
+          <div>
+            <div>调整原因:</div>
+            <Input.TextArea
+              value={adjustReason}
+              onChange={(e) => setAdjustReason(e.target.value)}
+              rows={3}
+              placeholder="请输入调整原因..."
+            />
+          </div>
+        </Space>
+      </Modal>
     </div>
   );
 };
