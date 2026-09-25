@@ -6,7 +6,7 @@ import { SearchOutlined, SnippetsOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import type { ValuationInput } from '../types';
 import type { AutoFillField } from '../services/autofill/types';
-import { percentToRatio } from '../utils/units';
+import { percentToRatio, ratioToPercent } from '../utils/units';
 import AutoFillDrawer from './AutoFillDrawer';
 import { useStore } from '../stores';
 import { suggestConstructionCost, CONSTRUCTION_COST_BY_SEGMENT } from '../constants/costBenchmarks';
@@ -78,6 +78,8 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
     lastLoadedId.current = id;
     const vals: Record<string, any> = { ...storeInput };
     if (vals.opening_date) vals.opening_date = dayjs(String(vals.opening_date));
+    if (typeof vals.occupancy_input === 'number') vals.occupancy_input = ratioToPercent(vals.occupancy_input);
+    if (typeof vals.fb_ratio === 'number') vals.fb_ratio = ratioToPercent(vals.fb_ratio);
     form.setFieldsValue(vals);
   }, [storeInput, form]);
 
