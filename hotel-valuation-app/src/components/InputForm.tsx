@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space, App as AntApp } from 'antd';
+import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space, Popover, App as AntApp } from 'antd';
 import type { FormProps } from 'antd';
 import { SearchOutlined, SnippetsOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -9,6 +9,7 @@ import type { AutoFillField } from '../services/autofill/types';
 import { percentToRatio } from '../utils/units';
 import AutoFillDrawer from './AutoFillDrawer';
 import { useStore } from '../stores';
+import { suggestConstructionCost, CONSTRUCTION_COST_BY_SEGMENT } from '../constants/costBenchmarks';
 
 const { Option } = Select;
 
@@ -26,6 +27,34 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
   const [drawerKeyword, setDrawerKeyword] = useState('');
   const storeInput = useStore((s) => s.input);
   const lastLoadedId = useRef<string | null>(null);
+  const segmentValue = Form.useWatch('segment', form) as ValuationInput['segment'];
+  const cityTierValue = Form.useWatch('city_tier', form) as ValuationInput['city_tier'];
+  const costSuggestion = suggestConstructionCost(segmentValue, cityTierValue);
+
+  const benchmarkContent = (
+    <div style={{ maxWidth: 360, fontSize: 12 }}>
+      <div style={{ marginBottom: 6, color: '#8c8c8c' }}>建安造价参考区间（元/㎡，网上公开数据，仅供参考）</div>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr style={{ textAlign: 'left', color: '#8c8c8c' }}>
+            <th style={{ padding: '2px 4px' }}>档次</th>
+            <th style={{ padding: '2px 4px' }}>单方造价</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(CONSTRUCTION_COST_BY_SEGMENT).map(([key, b]) => (
+            <tr key={key}>
+              <td style={{ padding: '2px 4px' }}>{b.label}</td>
+              <td style={{ padding: '2px 4px' }}>{b.min.toLocaleString()}–{b.max.toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div style={{ marginTop: 6, color: '#8c8c8c' }}>
+        城市能级：一线较二线上浮 20–40%，三四线下浮 15–25%（上海中端约 6,840–8,350，高端约 11,038–14,942，奢华约 14,925–17,840）。
+      </div>
+    </div>
+  );
 
   useEffect(() => {
     if (!storeInput) return;
@@ -82,6 +111,9 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
       original_cost: values.original_cost,
       renovation_cost: values.renovation_cost,
       equity: values.equity,
+      land_price_per_sqm: values.land_price_per_sqm || undefined,
+      construction_cost_per_sqm: values.construction_cost_per_sqm || undefined,
+      actual_transaction_price: values.actual_transaction_price || undefined,
     };
     
     onSubmit(processedValues);
@@ -395,7 +427,14 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           }}
         </Form.Item>
 
-        <Divider titlePlacement="start">市场参考（可选）</Divider>
+        <Divider titlePlacement="start">
+          <Space>
+            市场参考（可选）
+            <Popover content={benchmarkContent} title="造价参考" trigger="click" placement="right">
+              <Button type="link" size="small" style={{ padding: 0 }}>造价参考区间</Button>
+            </Popover>
+          </Space>
+        </Divider>
         <Row gutter={16}>
           <Col xs={24} md={8}>
             <Form.Item
@@ -410,7 +449,11 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             <Form.Item
               name="construction_cost_per_sqm"
               label="建造成本（元/㎡）"
-              extra="搜索地区建造成本"
+              extra={
+                costSuggestion
+                  ? `参考：${costSuggestion.segmentLabel} ${costSuggestion.minSqm.toLocaleString()}–${costSuggestion.maxSqm.toLocaleString()}（${costSuggestion.cityNote || '未选城市'}）`
+                  : '搜索地区建造成本'
+              }
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="例如：4000" />
             </Form.Item>

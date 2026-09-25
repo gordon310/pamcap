@@ -110,8 +110,8 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
   const valuationData = [
     { key: '1', method: '收益估值法', amount: result.valuation.income.toFixed(2), unit: '万元' },
     { key: '2', method: '倍数法估值', amount: result.valuation.multiple.toFixed(2), unit: '万元' },
-    { key: '3', method: '重置估值法', amount: result.valuation.replacement.toFixed(2), unit: '万元' },
-    { key: '4', method: '实际成交价', amount: result.valuation.actual_transaction?.toFixed(2) || '-', unit: '万元' },
+    { key: '3', method: '重置估值法', amount: (result.valuation.replacement ?? 0).toFixed(2), unit: '万元' },
+    { key: '4', method: '实际成交价', amount: (result.valuation.actual_transaction ?? 0).toFixed(2), unit: '万元' },
     { key: '5', method: '成本法下限', amount: result.valuation.cost_floor.toFixed(2), unit: '万元' },
     { key: '4', method: '每间房价值', amount: result.valuation.per_room.toFixed(2), unit: '万元' },
     { key: '5', method: '每㎡价值', amount: result.valuation.per_sqm.toFixed(4), unit: '万元' },
@@ -152,8 +152,8 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
         onChange={setEvaluation}
       />
 
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col xs={12} md={6}>
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={12} md={8}>
           <Statistic 
             title="保守估值" 
             value={rangeData.conservative} 
@@ -163,7 +163,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
             suffix="万元"
           />
         </Col>
-        <Col xs={12} md={6}>
+        <Col xs={12} md={8}>
           <Statistic 
             title="基准估值" 
             value={rangeData.base} 
@@ -173,7 +173,7 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
             suffix="万元"
           />
         </Col>
-        <Col xs={12} md={6}>
+        <Col xs={12} md={8}>
           <Statistic 
             title="乐观估值" 
             value={rangeData.optimistic} 
@@ -183,12 +183,32 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
             suffix="万元"
           />
         </Col>
-        <Col xs={12} md={6}>
+        <Col xs={12} md={8}>
           <Statistic 
             title="每间房价值" 
             value={result.valuation.per_room} 
             precision={2}
             valueStyle={{ color: '#722ed1' }}
+            prefix="¥"
+            suffix="万元"
+          />
+        </Col>
+        <Col xs={12} md={8}>
+          <Statistic 
+            title="重置估值法"
+            value={result.valuation.replacement || 0}
+            precision={2}
+            valueStyle={{ color: '#fa8c16' }}
+            prefix="¥"
+            suffix="万元"
+          />
+        </Col>
+        <Col xs={12} md={8}>
+          <Statistic 
+            title="实际成交价"
+            value={result.valuation.actual_transaction || 0}
+            precision={2}
+            valueStyle={{ color: '#13c2c2' }}
             prefix="¥"
             suffix="万元"
           />
