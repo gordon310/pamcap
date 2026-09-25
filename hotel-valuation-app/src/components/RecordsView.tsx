@@ -16,7 +16,7 @@ import {
   Popconfirm,
   App as AntApp,
 } from 'antd';
-import { DownloadOutlined, UploadOutlined, EyeOutlined, DeleteOutlined } from '@ant-design/icons';
+import { DownloadOutlined, UploadOutlined, EyeOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import type { ValuationRecord } from '../types';
 import { useStore } from '../stores';
 import { parseImport, mergeExperts, isSuperUser } from '../services/records';
@@ -26,7 +26,7 @@ const { Text, Paragraph } = Typography;
 
 const kindLabel = (kind: string) => (kind === 'revalue' ? '重新估值' : '生成');
 
-const RecordsView: FC = () => {
+const RecordsView: FC<{ onLoadRecord?: (r: ValuationRecord) => void }> = ({ onLoadRecord }) => {
   const records = useStore((s) => s.records);
   const experts = useStore((s) => s.experts);
   const remoteExperts = useStore((s) => s.remoteExperts);
@@ -122,6 +122,11 @@ const RecordsView: FC = () => {
       render: (_: unknown, r: ValuationRecord) => (
         <div onClick={(e) => e.stopPropagation()}>
           <Space>
+            {onLoadRecord && (
+              <Button type="link" icon={<EditOutlined />} onClick={() => onLoadRecord(r)}>
+                重新计算
+              </Button>
+            )}
             <Button type="link" icon={<EyeOutlined />} onClick={() => setViewing(r)}>
               查看
             </Button>
@@ -196,6 +201,17 @@ const RecordsView: FC = () => {
       <Drawer title="记录详情" width={560} open={!!viewing} onClose={() => setViewing(null)}>
         {viewing && (
           <Space direction="vertical" style={{ width: '100%' }} size="middle">
+            {onLoadRecord && (
+              <Button
+                type="primary"
+                icon={<EditOutlined />}
+                onClick={() => { onLoadRecord(viewing); setViewing(null); }}
+                block
+              >
+                重新打开并编辑
+              </Button>
+            )}
+
             <Descriptions column={1} size="small" bordered>
               <Descriptions.Item label="酒店">{viewing.input?.hotel_name || '-'}</Descriptions.Item>
               <Descriptions.Item label="专家">

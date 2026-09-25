@@ -58,6 +58,7 @@ interface AppState {
   loadRemoteExperts: (experts: Expert[]) => void;
   logoutExpert: () => void;
   setEvaluation: (content: string) => void;
+  loadRecord: (record: ValuationRecord) => void;
   deleteRecord: (id: string) => void;
   importRecords: (bundle: ImportBundle) => void;
   exportAdjustmentSubmission: () => { json: string; csv: string; count: number };
@@ -176,6 +177,14 @@ export const useStore = create<AppState>((set, get) => ({
       saveRecords(nextRecords);
     }
     set({ evaluation, records: nextRecords });
+  },
+
+  loadRecord: (record: ValuationRecord) => {
+    const input = record.input || null;
+    const overrides = record.overrides || {};
+    const evaluation = record.evaluation || null;
+    const result = record.result || null;
+    set({ input, overrides, evaluation, result, currentRecordId: record.id });
   },
 
   addOpinion: (opinion: Omit<Opinion, 'id' | 'at'>) => {

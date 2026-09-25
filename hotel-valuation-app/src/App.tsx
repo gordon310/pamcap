@@ -44,6 +44,7 @@ function App() {
     loginExpert,
     loadRemoteExperts,
     logoutExpert,
+    loadRecord,
   } = useStore();
 
   const allExperts = useMemo(() => mergeExperts(remoteExperts, experts), [remoteExperts, experts]);
@@ -291,7 +292,7 @@ function App() {
               {
                 key: 'records',
                 label: '记录',
-                children: <RecordsView />,
+                children: <RecordsView onLoadRecord={(r) => { loadRecord(r); setActiveMainTab('input'); }} />,
               },
               ...(isAdmin
                 ? [{ key: 'experts', label: '专家', children: <ExpertsView /> }]
