@@ -185,11 +185,11 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             >
               <Select placeholder="选择档次">
                 <Option value="S1">S1 - 豪华</Option>
-                <Option value="S2">S2 - 高端</Option>
-                <Option value="S3">S3 - 中高端</Option>
-                <Option value="S4">S4 - 中档</Option>
-                <Option value="S5">S5 - 经济</Option>
-                <Option value="S6">S6 - 有限服务</Option>
+                <Option value="S2">S2 - 超高端</Option>
+                <Option value="S3">S3 - 高端</Option>
+                <Option value="S4">S4 - 中高端</Option>
+                <Option value="S5">S5 - 中档</Option>
+                <Option value="S6">S6 - 经济型</Option>
               </Select>
             </Form.Item>
           </Col>

@@ -5,7 +5,7 @@ describe('valuationOptions', () => {
   test('档次选项带中文描述', () => {
     const opts = getFieldOptions('segment');
     expect(opts?.find((o) => o.value === 'S1')?.label).toBe('S1 - 豪华');
-    expect(opts?.find((o) => o.value === 'S6')?.label).toBe('S6 - 有限服务');
+    expect(opts?.find((o) => o.value === 'S6')?.label).toBe('S6 - 经济型');
   });
 
   test('业态选项带中文描述', () => {

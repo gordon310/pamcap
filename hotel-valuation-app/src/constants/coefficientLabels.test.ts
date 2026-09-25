@@ -10,7 +10,7 @@ describe('coefficientLabel', () => {
   });
 
   test('按档次动态生成说明', () => {
-    expect(coefficientLabel('cap_rate_base.by_segment.S3')).toBe('Cap Rate 基准·档次 S3 - 中高端');
+    expect(coefficientLabel('cap_rate_base.by_segment.S3')).toBe('Cap Rate 基准·档次 S3 - 高端');
     expect(coefficientLabel('owner_expense_coef.by_segment.S1')).toBe('业主费用系数·档次 S1 - 豪华');
   });
 

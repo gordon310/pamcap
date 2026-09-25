@@ -23,11 +23,11 @@ export const LOCATION_OPTIONS: ValuationOption[] = [
 
 export const SEGMENT_OPTIONS: ValuationOption[] = [
   { value: 'S1', label: 'S1 - 豪华' },
-  { value: 'S2', label: 'S2 - 高端' },
-  { value: 'S3', label: 'S3 - 中高端' },
-  { value: 'S4', label: 'S4 - 中档' },
-  { value: 'S5', label: 'S5 - 经济' },
-  { value: 'S6', label: 'S6 - 有限服务' },
+  { value: 'S2', label: 'S2 - 超高端' },
+  { value: 'S3', label: 'S3 - 高端' },
+  { value: 'S4', label: 'S4 - 中高端' },
+  { value: 'S5', label: 'S5 - 中档' },
+  { value: 'S6', label: 'S6 - 经济型' },
 ];
 
 export const PROPERTY_TYPE_OPTIONS: ValuationOption[] = [
