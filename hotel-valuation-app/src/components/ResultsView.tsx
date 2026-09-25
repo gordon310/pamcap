@@ -52,6 +52,10 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
     return typeof value === 'number' ? value : 0;
   };
 
+  const comparables = (input?.actual_transactions || []).filter(
+    (c) => c && (c.hotel_name || typeof c.amount === 'number'),
+  );
+
   const openAdjust = (row: TraceItem) => {
     const paths = coefficientPathsForStep(row.step, input);
     const values: Record<string, number> = {};
@@ -235,13 +239,37 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
             key: '2',
             label: '估值详情',
             children: (
-              <Table
-                columns={valuationColumns}
-                dataSource={valuationData}
-                pagination={false}
-                size="small"
-                scroll={{ x: 'max-content' }}
-              />
+              <>
+                <Table
+                  columns={valuationColumns}
+                  dataSource={valuationData}
+                  pagination={false}
+                  size="small"
+                  scroll={{ x: 'max-content' }}
+                />
+                {comparables.length > 0 && (
+                  <div style={{ marginTop: 16 }}>
+                    <Text strong>实际成交价参考项目</Text>
+                    <Table
+                      rowKey={(_, i) => String(i)}
+                      style={{ marginTop: 8 }}
+                      columns={[
+                        { title: '日期', dataIndex: 'date', key: 'date', render: (v: string) => v || '-' },
+                        { title: '成交酒店名称', dataIndex: 'hotel_name', key: 'hotel_name', render: (v: string) => v || '-' },
+                        {
+                          title: '成交金额（万元）',
+                          dataIndex: 'amount',
+                          key: 'amount',
+                          render: (v: number) => (typeof v === 'number' ? v.toFixed(2) : '-'),
+                        },
+                      ]}
+                      dataSource={comparables}
+                      pagination={false}
+                      size="small"
+                    />
+                  </div>
+                )}
+              </>
             ),
           },
           {

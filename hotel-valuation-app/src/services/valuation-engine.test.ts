@@ -158,4 +158,35 @@ describe('Valuation Engine Tests', () => {
     expect(result.metrics.adr).toBeGreaterThan(0);
     expect(result.valuation.range.base).toBeGreaterThan(0);
   });
+
+  test('重置估值法 = (楼板价 + 单方造价) × 面积', () => {
+    const result = calculateValuation({
+      ...goldenSampleInput,
+      gfa: 10000,
+      land_price_per_sqm: 5000,
+      construction_cost_per_sqm: 4000,
+    });
+    // (5000 + 4000) * 10000 / 10000 = 9000 万元
+    expect(result.valuation.replacement).toBeCloseTo(9000, 5);
+  });
+
+  test('实际成交价取参考项目金额平均值', () => {
+    const result = calculateValuation({
+      ...goldenSampleInput,
+      actual_transactions: [
+        { date: '2024-01', hotel_name: 'A', amount: 10000 },
+        { date: '2024-06', hotel_name: 'B', amount: 14000 },
+      ],
+    });
+    expect(result.valuation.actual_transaction).toBeCloseTo(12000, 5);
+  });
+
+  test('参考项目为空时回退到 actual_transaction_price', () => {
+    const result = calculateValuation({
+      ...goldenSampleInput,
+      actual_transactions: [],
+      actual_transaction_price: 8000,
+    });
+    expect(result.valuation.actual_transaction).toBe(8000);
+  });
 });

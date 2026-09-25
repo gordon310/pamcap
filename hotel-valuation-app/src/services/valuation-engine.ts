@@ -407,31 +407,50 @@ export const calculateValuation = (
   // S20b: 重置估值法
   const landPrice = input.land_price_per_sqm || 0;
   const constCostPerSqm = input.construction_cost_per_sqm || 0;
-  const vReplacement = (landPrice + constCostPerSqm) * input.gfa / 10000;
+  const landTotal = (landPrice * input.gfa) / 10000;
+  const constructionTotal = (constCostPerSqm * input.gfa) / 10000;
+  const vReplacement = landTotal + constructionTotal;
   trace.push({
     step: 'S20b',
     name: '重置估值法',
-    formula: 'v_replacement = (土地楼板价 + 建造成本/㎡) × 建筑面积 ÷ 10000',
-    inputs: { land_price_per_sqm: landPrice, construction_cost_per_sqm: constCostPerSqm, gfa: input.gfa },
+    formula: 'v_replacement = 商业楼板价×面积 + 行业单方造价×面积',
+    inputs: {
+      land_price_per_sqm: landPrice,
+      construction_cost_per_sqm: constCostPerSqm,
+      gfa: input.gfa,
+      land_total: landTotal,
+      construction_total: constructionTotal,
+    },
     result: vReplacement,
     unit: '万元',
     source: '用户输入',
     adjusted: false,
-    note: '搜索地区纯商业楼板价 + 建造成本'
+    note: '搜索酒店所在地商业均价楼板价 + 最新行业每㎡造价标准'
   });
 
-  // S20c: 实际成交价
-  const vActual = input.actual_transaction_price || 0;
+  // S20c: 实际成交价（同规模近似面积地段的参考成交项目，取平均）
+  const comparables = (input.actual_transactions || []).filter(
+    (c) => typeof c?.amount === 'number' && c.amount > 0,
+  );
+  const comparableAmounts = comparables.map((c) => c.amount as number);
+  const vActual =
+    comparableAmounts.length > 0
+      ? comparableAmounts.reduce((a, b) => a + b, 0) / comparableAmounts.length
+      : input.actual_transaction_price || 0;
   trace.push({
     step: 'S20c',
     name: '实际成交价',
-    formula: '直接输入',
-    inputs: { actual_transaction_price: vActual },
+    formula: comparableAmounts.length > 0 ? 'v_actual = 参考成交项目金额平均值' : '直接输入',
+    inputs: {
+      comparable_count: comparableAmounts.length,
+      amounts: comparableAmounts,
+      actual_transaction_price: input.actual_transaction_price || 0,
+    },
     result: vActual,
     unit: '万元',
     source: '用户输入',
     adjusted: false,
-    note: '搜索同地区酒店成交价'
+    note: '同规模近似面积地段酒店的参考成交项目'
   });
 
   // S21: 估值区间 (Conservative/Base/Optimistic)

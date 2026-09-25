@@ -23,6 +23,14 @@ export interface ValuationInput {
   land_price_per_sqm?: number;
   construction_cost_per_sqm?: number;
   actual_transaction_price?: number;
+  actual_transactions?: TransactionComparable[];
+}
+
+// 同规模、近似面积与地段的参考成交项目
+export interface TransactionComparable {
+  date?: string;
+  hotel_name?: string;
+  amount?: number;
 }
 
 // Classification for hotel properties

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space, Popover, App as AntApp } from 'antd';
+import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space, Popover, Typography, App as AntApp } from 'antd';
 import type { FormProps } from 'antd';
 import { SearchOutlined, SnippetsOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -12,6 +12,7 @@ import { useStore } from '../stores';
 import { suggestConstructionCost, CONSTRUCTION_COST_BY_SEGMENT } from '../constants/costBenchmarks';
 
 const { Option } = Select;
+const { Text } = Typography;
 
 interface InputFormProps {
   onSubmit: (values: ValuationInput) => void;
@@ -29,7 +30,21 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
   const lastLoadedId = useRef<string | null>(null);
   const segmentValue = Form.useWatch('segment', form) as ValuationInput['segment'];
   const cityTierValue = Form.useWatch('city_tier', form) as ValuationInput['city_tier'];
+  const gfaValue = Form.useWatch('gfa', form) as number;
+  const landValue = Form.useWatch('land_price_per_sqm', form) as number;
+  const constructionValue = Form.useWatch('construction_cost_per_sqm', form) as number;
+  const comparablesValue = Form.useWatch('actual_transactions', form) as
+    | Array<{ amount?: number }>
+    | undefined;
   const costSuggestion = suggestConstructionCost(segmentValue, cityTierValue);
+  const replacementPreview = ((Number(landValue) || 0) + (Number(constructionValue) || 0)) * (Number(gfaValue) || 0) / 10000;
+  const comparableAmounts = (comparablesValue || [])
+    .map((c) => Number(c?.amount))
+    .filter((n) => Number.isFinite(n) && n > 0);
+  const transactionPreview =
+    comparableAmounts.length > 0
+      ? comparableAmounts.reduce((a, b) => a + b, 0) / comparableAmounts.length
+      : 0;
 
   const benchmarkContent = (
     <div style={{ maxWidth: 360, fontSize: 12 }}>
@@ -114,6 +129,13 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
       land_price_per_sqm: values.land_price_per_sqm || undefined,
       construction_cost_per_sqm: values.construction_cost_per_sqm || undefined,
       actual_transaction_price: values.actual_transaction_price || undefined,
+      actual_transactions: (values.actual_transactions || [])
+        .filter((c: any) => c && (c.hotel_name || c.amount))
+        .map((c: any) => ({
+          date: c.date || undefined,
+          hotel_name: c.hotel_name || undefined,
+          amount: Number(c.amount) || 0,
+        })),
     };
     
     onSubmit(processedValues);
@@ -439,8 +461,8 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           <Col xs={24} md={8}>
             <Form.Item
               name="land_price_per_sqm"
-              label="土地楼板价（元/㎡）"
-              extra="搜索地区纯商业楼面价"
+              label="商业均价楼板价（元/㎡）"
+              extra="搜索酒店所在地商业均价楼板价"
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="例如：5000" />
             </Form.Item>
@@ -448,26 +470,74 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           <Col xs={24} md={8}>
             <Form.Item
               name="construction_cost_per_sqm"
-              label="建造成本（元/㎡）"
+              label="行业单方造价（元/㎡）"
               extra={
                 costSuggestion
                   ? `参考：${costSuggestion.segmentLabel} ${costSuggestion.minSqm.toLocaleString()}–${costSuggestion.maxSqm.toLocaleString()}（${costSuggestion.cityNote || '未选城市'}）`
-                  : '搜索地区建造成本'
+                  : '最新酒店行业每平方米造价标准'
               }
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="例如：4000" />
             </Form.Item>
           </Col>
           <Col xs={24} md={8}>
-            <Form.Item
-              name="actual_transaction_price"
-              label="实际成交价（万元）"
-              extra="搜索同地区酒店成交价"
-            >
-              <InputNumber min={0} style={{ width: '100%' }} placeholder="例如：15000" />
+            <Form.Item label="重置估值法预览" extra="(楼板价 + 单方造价) × 建筑面积">
+              <InputNumber
+                value={replacementPreview}
+                readOnly
+                precision={2}
+                style={{ width: '100%' }}
+                suffix="万元"
+              />
             </Form.Item>
           </Col>
         </Row>
+
+        <Divider plain titlePlacement="start" style={{ fontSize: 13, color: '#8c8c8c' }}>
+          实际成交价参考项目（日期 + 成交酒店名称 + 成交金额）
+        </Divider>
+        <Form.List name="actual_transactions">
+          {(fields, { add, remove }) => (
+            <div>
+              {fields.map((field) => (
+                <Row gutter={8} key={field.key} align="middle" style={{ marginBottom: 4 }}>
+                  <Col xs={24} md={7}>
+                    <Form.Item name={[field.name, 'date']} style={{ marginBottom: 4 }}>
+                      <Input placeholder="日期，如 2024-06" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={24} md={9}>
+                    <Form.Item name={[field.name, 'hotel_name']} style={{ marginBottom: 4 }}>
+                      <Input placeholder="成交酒店名称" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={16} md={6}>
+                    <Form.Item
+                      name={[field.name, 'amount']}
+                      style={{ marginBottom: 4 }}
+                      rules={[{ type: 'number', min: 0, message: '金额需大于等于0' }]}
+                    >
+                      <InputNumber min={0} style={{ width: '100%' }} placeholder="成交金额" suffix="万元" />
+                    </Form.Item>
+                  </Col>
+                  <Col xs={8} md={2}>
+                    <Button type="link" danger onClick={() => remove(field.name)}>
+                      删除
+                    </Button>
+                  </Col>
+                </Row>
+              ))}
+              <Space style={{ marginBottom: 8 }}>
+                <Button onClick={() => add()} size="small">+ 添加参考项目</Button>
+                {comparableAmounts.length > 0 && (
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    参考均值：{transactionPreview.toFixed(2)} 万元（{comparableAmounts.length} 个项目）
+                  </Text>
+                )}
+              </Space>
+            </div>
+          )}
+        </Form.List>
 
         <Form.Item>
           <Button type="primary" htmlType="submit" style={{ marginTop: 16 }}>
