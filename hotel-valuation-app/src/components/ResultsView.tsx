@@ -156,66 +156,73 @@ const ResultsView: FC<ResultsViewProps> = ({ result }) => {
         onChange={setEvaluation}
       />
 
+      <Card size="small" title="收益估值法" style={{ marginBottom: 16 }}>
+        <Row gutter={[16, 16]}>
+          <Col xs={12} md={6}>
+            <Statistic
+              title="保守估值"
+              value={rangeData.conservative}
+              precision={2}
+              valueStyle={{ color: '#cf1322' }}
+              prefix="¥"
+              suffix="万元"
+            />
+          </Col>
+          <Col xs={12} md={6}>
+            <Statistic
+              title="基准估值"
+              value={rangeData.base}
+              precision={2}
+              valueStyle={{ color: '#3f8600' }}
+              prefix="¥"
+              suffix="万元"
+            />
+          </Col>
+          <Col xs={12} md={6}>
+            <Statistic
+              title="乐观估值"
+              value={rangeData.optimistic}
+              precision={2}
+              valueStyle={{ color: '#1890ff' }}
+              prefix="¥"
+              suffix="万元"
+            />
+          </Col>
+          <Col xs={12} md={6}>
+            <Statistic
+              title="每间房价值"
+              value={result.valuation.per_room}
+              precision={2}
+              valueStyle={{ color: '#722ed1' }}
+              prefix="¥"
+              suffix="万元"
+            />
+          </Col>
+        </Row>
+      </Card>
+
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={12} md={8}>
-          <Statistic 
-            title="保守估值" 
-            value={rangeData.conservative} 
-            precision={2}
-            valueStyle={{ color: '#cf1322' }}
-            prefix="¥"
-            suffix="万元"
-          />
+        <Col xs={12} md={12}>
+          <Card size="small" title="重置估值法">
+            <Statistic
+              value={result.valuation.replacement || 0}
+              precision={2}
+              valueStyle={{ color: '#fa8c16' }}
+              prefix="¥"
+              suffix="万元"
+            />
+          </Card>
         </Col>
-        <Col xs={12} md={8}>
-          <Statistic 
-            title="基准估值" 
-            value={rangeData.base} 
-            precision={2}
-            valueStyle={{ color: '#3f8600' }}
-            prefix="¥"
-            suffix="万元"
-          />
-        </Col>
-        <Col xs={12} md={8}>
-          <Statistic 
-            title="乐观估值" 
-            value={rangeData.optimistic} 
-            precision={2}
-            valueStyle={{ color: '#1890ff' }}
-            prefix="¥"
-            suffix="万元"
-          />
-        </Col>
-        <Col xs={12} md={8}>
-          <Statistic 
-            title="每间房价值" 
-            value={result.valuation.per_room} 
-            precision={2}
-            valueStyle={{ color: '#722ed1' }}
-            prefix="¥"
-            suffix="万元"
-          />
-        </Col>
-        <Col xs={12} md={8}>
-          <Statistic 
-            title="重置估值法"
-            value={result.valuation.replacement || 0}
-            precision={2}
-            valueStyle={{ color: '#fa8c16' }}
-            prefix="¥"
-            suffix="万元"
-          />
-        </Col>
-        <Col xs={12} md={8}>
-          <Statistic 
-            title="实际成交价"
-            value={result.valuation.actual_transaction || 0}
-            precision={2}
-            valueStyle={{ color: '#13c2c2' }}
-            prefix="¥"
-            suffix="万元"
-          />
+        <Col xs={12} md={12}>
+          <Card size="small" title="实际成交价">
+            <Statistic
+              value={result.valuation.actual_transaction || 0}
+              precision={2}
+              valueStyle={{ color: '#13c2c2' }}
+              prefix="¥"
+              suffix="万元"
+            />
+          </Card>
         </Col>
       </Row>
 
