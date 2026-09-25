@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { FC } from 'react';
 import { Form, Input, InputNumber, Select, DatePicker, Button, Card, Row, Col, Divider, Space, App as AntApp } from 'antd';
 import type { FormProps } from 'antd';
@@ -8,6 +8,7 @@ import type { ValuationInput } from '../types';
 import type { AutoFillField } from '../services/autofill/types';
 import { percentToRatio } from '../utils/units';
 import AutoFillDrawer from './AutoFillDrawer';
+import { useStore } from '../stores';
 
 const { Option } = Select;
 
@@ -15,7 +16,7 @@ interface InputFormProps {
   onSubmit: (values: ValuationInput) => void;
 }
 
-const NUMERIC_KEYS = ['rooms', 'gfa', 'ctrip_adr', 'owner_ebitda', 'other_income', 'equity', 'construction_cost', 'acquisition_price', 'original_cost', 'renovation_cost'];
+const NUMERIC_KEYS = ['rooms', 'gfa', 'ctrip_adr', 'owner_ebitda', 'other_income', 'equity', 'construction_cost', 'acquisition_price', 'original_cost', 'renovation_cost', 'land_price_per_sqm', 'construction_cost_per_sqm', 'actual_transaction_price'];
 
 const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
   const [form] = Form.useForm();
@@ -23,6 +24,18 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState<'map' | 'paste'>('map');
   const [drawerKeyword, setDrawerKeyword] = useState('');
+  const storeInput = useStore((s) => s.input);
+  const lastLoadedId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!storeInput) return;
+    const id = JSON.stringify(storeInput);
+    if (id === lastLoadedId.current) return;
+    lastLoadedId.current = id;
+    const vals: Record<string, any> = { ...storeInput };
+    if (vals.opening_date) vals.opening_date = dayjs(String(vals.opening_date));
+    form.setFieldsValue(vals);
+  }, [storeInput, form]);
 
   const openDrawer = (tab: 'map' | 'paste') => {
     setDrawerKeyword(String(form.getFieldValue('hotel_name') || ''));
