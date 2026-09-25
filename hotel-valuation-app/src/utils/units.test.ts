@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { percentToRatio, ratioToPercent } from './units';
+import { percentToRatio, ratioToPercent, repairLegacyRatio } from './units';
 
 describe('percentToRatio', () => {
   test('100% -> 1', () => {
@@ -26,5 +26,23 @@ describe('ratioToPercent', () => {
 
   test('round-trips with percentToRatio', () => {
     expect(ratioToPercent(percentToRatio(72.5))).toBeCloseTo(72.5);
+  });
+});
+
+describe('repairLegacyRatio', () => {
+  test('0.007 -> 0.7 (多除一次100的历史值)', () => {
+    expect(repairLegacyRatio(0.007)).toBeCloseTo(0.7);
+  });
+
+  test('正常的 0.7 不变', () => {
+    expect(repairLegacyRatio(0.7)).toBe(0.7);
+  });
+
+  test('0 不变', () => {
+    expect(repairLegacyRatio(0)).toBe(0);
+  });
+
+  test('0.15 不变', () => {
+    expect(repairLegacyRatio(0.15)).toBe(0.15);
   });
 });

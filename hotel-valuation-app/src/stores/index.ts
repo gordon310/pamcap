@@ -27,6 +27,7 @@ import {
   type ImportBundle,
 } from '../services/records';
 import baselineData from '../utils/baseline.json';
+import { repairLegacyRatio } from '../utils/units';
 
 interface AppState {
   input: ValuationInput | null;
@@ -180,7 +181,13 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   loadRecord: (record: ValuationRecord) => {
-    const input = record.input || null;
+    const input = record.input
+      ? {
+          ...record.input,
+          occupancy_input: repairLegacyRatio(record.input.occupancy_input),
+          fb_ratio: repairLegacyRatio(record.input.fb_ratio),
+        }
+      : null;
     const overrides = record.overrides || {};
     const evaluation = record.evaluation || null;
     const result = record.result || null;
