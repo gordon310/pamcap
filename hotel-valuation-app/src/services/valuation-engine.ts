@@ -358,11 +358,11 @@ export const calculateValuation = (
   });
   metrics.cap = cap;
 
-  // S18: 收益法估值
+  // S18: 收益估值法
   const vIncome = noi / cap;
   trace.push({
     step: 'S18',
-    name: '收益法估值',
+    name: '收益估值法',
     formula: 'v_income = noi / cap',
     inputs: { noi, cap },
     result: vIncome,
@@ -402,6 +402,36 @@ export const calculateValuation = (
     source: '基准',
     adjusted: false,
     note: '简化计算，实际应包含土地价值和折旧'
+  });
+
+  // S20b: 重置估值法
+  const landPrice = input.land_price_per_sqm || 0;
+  const constCostPerSqm = input.construction_cost_per_sqm || 0;
+  const vReplacement = (landPrice + constCostPerSqm) * input.gfa / 10000;
+  trace.push({
+    step: 'S20b',
+    name: '重置估值法',
+    formula: 'v_replacement = (土地楼板价 + 建造成本/㎡) × 建筑面积 ÷ 10000',
+    inputs: { land_price_per_sqm: landPrice, construction_cost_per_sqm: constCostPerSqm, gfa: input.gfa },
+    result: vReplacement,
+    unit: '万元',
+    source: '用户输入',
+    adjusted: false,
+    note: '搜索地区纯商业楼板价 + 建造成本'
+  });
+
+  // S20c: 实际成交价
+  const vActual = input.actual_transaction_price || 0;
+  trace.push({
+    step: 'S20c',
+    name: '实际成交价',
+    formula: '直接输入',
+    inputs: { actual_transaction_price: vActual },
+    result: vActual,
+    unit: '万元',
+    source: '用户输入',
+    adjusted: false,
+    note: '搜索同地区酒店成交价'
   });
 
   // S21: 估值区间 (Conservative/Base/Optimistic)
@@ -497,6 +527,8 @@ export const calculateValuation = (
     income: vIncome,
     multiple: vMultiple,
     cost_floor: vCost,
+    replacement: vReplacement,
+    actual_transaction: vActual,
     range: {
       conservative: conservativeVal,
       base: baseVal,

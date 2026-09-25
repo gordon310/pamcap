@@ -381,7 +381,38 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
             return null;
           }}
         </Form.Item>
-        
+
+        <Divider titlePlacement="start">市场参考（可选）</Divider>
+        <Row gutter={16}>
+          <Col xs={24} md={8}>
+            <Form.Item
+              name="land_price_per_sqm"
+              label="土地楼板价（元/㎡）"
+              extra="搜索地区纯商业楼面价"
+            >
+              <InputNumber min={0} style={{ width: '100%' }} placeholder="例如：5000" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              name="construction_cost_per_sqm"
+              label="建造成本（元/㎡）"
+              extra="搜索地区建造成本"
+            >
+              <InputNumber min={0} style={{ width: '100%' }} placeholder="例如：4000" />
+            </Form.Item>
+          </Col>
+          <Col xs={24} md={8}>
+            <Form.Item
+              name="actual_transaction_price"
+              label="实际成交价（万元）"
+              extra="搜索同地区酒店成交价"
+            >
+              <InputNumber min={0} style={{ width: '100%' }} placeholder="例如：15000" />
+            </Form.Item>
+          </Col>
+        </Row>
+
         <Form.Item>
           <Button type="primary" htmlType="submit" style={{ marginTop: 16 }}>
             计算估值

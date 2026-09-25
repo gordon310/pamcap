@@ -20,6 +20,9 @@ export interface ValuationInput {
   original_cost?: number;
   renovation_cost?: number;
   equity: number;
+  land_price_per_sqm?: number;
+  construction_cost_per_sqm?: number;
+  actual_transaction_price?: number;
 }
 
 // Classification for hotel properties
@@ -76,6 +79,8 @@ export interface ValuationResult {
     income: number;
     multiple: number;
     cost_floor: number;
+    replacement: number;
+    actual_transaction: number;
     range: {
       conservative: number;
       base: number;

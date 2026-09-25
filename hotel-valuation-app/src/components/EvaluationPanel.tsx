@@ -36,7 +36,7 @@ const EvaluationPanel: FC<EvaluationPanelProps> = ({ expert, evaluation, onChang
         value={content}
         maxLength={2000}
         showCount
-        placeholder="例如：本次采用的 GOP 率偏高，建议下调；地段系数取值合理；收益法与倍数法差异较大，建议以收益法为主……"
+        placeholder="例如：本次采用的 GOP 率偏高，建议下调；地段系数取值合理；收益估值法与倍数法差异较大，建议以收益估值法为主；重置估值法与实际成交价可作为参考……"
         onChange={(e) => onChange(e.target.value)}
       />
       <div style={{ marginTop: 8 }}>
