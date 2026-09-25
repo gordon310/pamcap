@@ -133,7 +133,7 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           <Col xs={24} md={12}>
             <Form.Item
               name="gfa"
-              label="总建筑面积（含地下室）㎡"
+              label="总建筑面积（不含地下室）㎡"
               rules={[{ required: true, message: '请输入总建筑面积' }, { type: 'number', min: 0, message: '面积必须大于等于0' }]}
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="平方米" />
@@ -273,22 +273,23 @@ const InputForm: FC<InputFormProps> = ({ onSubmit }) => {
           <Col xs={24} md={12}>
             <Form.Item
               name="fb_ratio"
-              label="客房餐饮收入比（%）"
-              rules={[{ required: true, message: '请输入客房餐饮收入比' }, { type: 'number', min: 0, message: '比例必须大于等于0' }]}
+              label="餐饮÷客房收入比（%）"
+              extra="= 餐饮占总收入比 ÷ 客房占总收入比"
+              rules={[{ required: true, message: '请输入餐饮÷客房收入比' }, { type: 'number', min: 0, message: '比例必须大于等于0' }]}
             >
               <InputNumber 
                 min={0} 
                 step={0.1}
                 suffix="%"
                 style={{ width: '100%' }} 
-                placeholder="餐饮收入 ÷ 客房收入" 
+                placeholder="例如：餐饮40%÷客房55% = 72.7" 
               />
             </Form.Item>
           </Col>
           <Col xs={24} md={12}>
             <Form.Item
               name="owner_ebitda"
-              label="业主利润（EBITDA 口径）万元"
+              label="EBITDA（万元）"
             >
               <InputNumber min={0} style={{ width: '100%' }} placeholder="作为校准锚点" />
             </Form.Item>
